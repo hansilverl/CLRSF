@@ -18,7 +18,7 @@ namespace CLSF_Compare.Services
                 if (response.StatusCode == System.Net.HttpStatusCode.OK)
                 {
                     string result = response.Content.ReadAsStringAsync().Result;
-                    var lines = result.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).Skip(1);
+                    var lines = result.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).Skip(1);   // Skip the header line
 
                     foreach (var item in lines)
                     {

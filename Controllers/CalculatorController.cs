@@ -20,21 +20,13 @@ namespace CLSF_Compare.Controllers
         }
 
         [HttpPost]
-        public IActionResult Calculate(ManualInputModel input)
+        public IActionResult Calculate(InputModel input)
         {
             try
             {
                 var clearShiftRate = _exchangeRateService.GetBOIRate(input.SourceCurrency, input.TargetCurrency, input.Date);
 
-                var bankCost = input.Amount * input.BankRate + input.BankFees;
-                var clearShiftCost = input.Amount * clearShiftRate;
-
-                var result = new CalculationResultModel
-                {
-                    BankConversionCost = bankCost,
-                    ClearShiftConversionCost = clearShiftCost,
-                    Savings = bankCost - clearShiftCost
-                };
+                var result = CalculationResultModel.Calculate(input.Amount, input.BankRate, input.BankFees, clearShiftRate);
 
                 return View("Result", result);
             }

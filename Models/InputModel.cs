@@ -1,6 +1,6 @@
 namespace CLSF_Compare.Models
 {
-    public class ManualInputModel
+    public class InputModel
     {
         public DateTime Date { get; set; }
         public string SourceCurrency { get; set; }
