@@ -26,7 +26,7 @@ namespace CLSF_Compare.Controllers
             {
                 var clearShiftRate = _exchangeRateService.GetBOIRate(input.SourceCurrency, input.TargetCurrency, input.Date);
 
-                var result = CalculationResultModel.Calculate(input.Amount, input.BankRate, input.BankFees, clearShiftRate);
+                var result = ConversionCalculationModel.Calculate(input.Amount, input.BankRate, input.BankFees, clearShiftRate);
 
                 return View("Result", result);
             }
