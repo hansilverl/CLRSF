@@ -1,8 +1,8 @@
-using CLRSHFT_compare.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using CLSF_Compare.Models;
 
-namespace CLRSHFT_compare.Controllers
+namespace CLSF_Compare.Controllers
 {
     public class HomeController : Controller
     {

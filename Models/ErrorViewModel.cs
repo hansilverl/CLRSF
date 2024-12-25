@@ -1,4 +1,4 @@
-namespace CLRSHFT_compare.Models
+namespace CLSF_Compare.Models
 {
     public class ErrorViewModel
     {
