@@ -2,11 +2,8 @@ namespace CLSF_Compare.Models
 {
     public class CalculationResultModel
     {
-
-        public decimal ClearShiftRate { get; set; }
-        public decimal BankTotalCost { get; set; }
-        public decimal ClearShiftTotalCost { get; set; }
-        public decimal PotentialSavings { get; set; }
+        public decimal BankConversionCost { get; set; }
+        public decimal ClearShiftConversionCost { get; set; }
+        public decimal Savings { get; set; }
     }
-    
 }

@@ -1,5 +1,6 @@
 using System.Net.Http;
 using System;
+using CLSF_Compare.Models;
 
 namespace CLSF_Compare.Services
 {
@@ -22,8 +23,7 @@ namespace CLSF_Compare.Services
                     foreach (var item in lines)
                     {
                         var values = item.Split(',');
-                        decimal rateValue;
-                        if (decimal.TryParse(values[13], out rateValue) && rateValue > 0)
+                        if (decimal.TryParse(values[13], out decimal rateValue) && rateValue > 0)
                         {
                             return rateValue;
                         }

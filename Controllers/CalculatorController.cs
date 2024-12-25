@@ -1,45 +1,49 @@
 using Microsoft.AspNetCore.Mvc;
 using CLSF_Compare.Models;
 using CLSF_Compare.Services;
-using System.Diagnostics;
 
-public class CalculatorController : Controller
+namespace CLSF_Compare.Controllers
 {
-    private readonly IExchangeRateService _exchangeRateService;
-
-    public CalculatorController(IExchangeRateService exchangeRateService)
+    public class CalculatorController : Controller
     {
-        _exchangeRateService = exchangeRateService;
-    }
+        private readonly IExchangeRateService _exchangeRateService;
 
-    [HttpGet]
-    public IActionResult ManualInput()
-    {
-        return View();
-    }
-
-    [HttpPost]
-    public IActionResult ManualInput(ManualInputModel model)
-    {
-        if (!ModelState.IsValid)
+        public CalculatorController(IExchangeRateService exchangeRateService)
         {
-            return View(model);
+            _exchangeRateService = exchangeRateService;
         }
 
-        // Get BOI rate
-        decimal boiRate = _exchangeRateService.GetBOIRate(model.SourceCurrency, model.TargetCurrency, model.TransactionDate);
-
-        // Calculate costs
-        decimal clearShiftTotalCost = model.Amount * boiRate; // ClearShift uses BOI rate with no commission
-        decimal bankTotalCost = (model.Amount * model.BankRate) + model.BankCommission;
-        var result = new CalculationResultModel
+        [HttpGet]
+        public IActionResult ManualInput()
         {
-            ClearShiftRate = boiRate,
-            BankTotalCost = bankTotalCost,
-            ClearShiftTotalCost = clearShiftTotalCost,
-            PotentialSavings = bankTotalCost - clearShiftTotalCost
-        };
+            return View();
+        }
 
-        return View("Result", result);
+        [HttpPost]
+        public IActionResult Calculate(ManualInputModel input)
+        {
+            try
+            {
+                var clearShiftRate = _exchangeRateService.GetBOIRate(input.SourceCurrency, input.TargetCurrency, input.Date);
+
+                var bankCost = input.Amount * input.BankRate + input.BankFees;
+                var clearShiftCost = input.Amount * clearShiftRate;
+
+                var result = new CalculationResultModel
+                {
+                    BankConversionCost = bankCost,
+                    ClearShiftConversionCost = clearShiftCost,
+                    Savings = bankCost - clearShiftCost
+                };
+
+                return View("Result", result);
+            }
+            catch (Exception ex)
+            {
+                // Handle errors (e.g., API failures)
+                ModelState.AddModelError("", $"Error: {ex.Message}");
+                return View("ManualInput", input);
+            }
+        }
     }
 }
