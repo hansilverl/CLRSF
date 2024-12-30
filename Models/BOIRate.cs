@@ -1,3 +1,4 @@
+// redo this model to match the data from the API
 namespace CLSF_Compare.Models
 {
     public class BOIRate
@@ -11,7 +12,7 @@ namespace CLSF_Compare.Models
         public string DATA_SOURCE { get; set; }
         public string TIME_COLLECT { get; set; }
         public string CONF_STATUS { get; set; }
-        public string PUB_WEBSITE { get; set; }
+        public string PUB_WEBSITE { get; set; } 
         public int UNIT_MULT { get; set; }
         public string COMMENTS { get; set; }
         public DateTime TIME_PERIOD { get; set; }
