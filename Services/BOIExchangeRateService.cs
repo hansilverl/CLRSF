@@ -9,6 +9,7 @@ namespace CLSF_Compare.Services
     {
         public decimal GetBOIRate(string sourceCurrency, string targetCurrency, DateTime date)
         {
+            // TODO: Add helper function that goes back to previous business day if the requested date is a weekend or holiday
             string sURL = $"https://edge.boi.gov.il/FusionEdgeServer/sdmx/v2/data/dataflow/BOI.STATISTICS/EXR/1.0?startperiod={date:yyyy-MM-dd}&endperiod={date:yyyy-MM-dd}&format=csv";
 
             using (var httpClient = new HttpClient())
