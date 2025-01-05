@@ -21,7 +21,7 @@ namespace CLSF_Compare.Services
             using (var httpClient = new HttpClient())
             {
                 var request = new HttpRequestMessage(HttpMethod.Get, sURL);
-                var response = httpClient.SendAsync(request).Result;    // Async call to the API - don't block the main thread
+                var response = httpClient.SendAsync(request).Result;    // The .Result property blocks the current thread until the task is completed
 
                 if (response.StatusCode == System.Net.HttpStatusCode.OK)
                 {
@@ -61,7 +61,7 @@ namespace CLSF_Compare.Services
                 {
                     string sURL = $"https://edge.boi.gov.il/FusionEdgeServer/sdmx/v2/data/dataflow/BOI.STATISTICS/EXR/1.0?startperiod={checkDate:yyyy-MM-dd}&endperiod={checkDate:yyyy-MM-dd}&format=csv";
                     var request = new HttpRequestMessage(HttpMethod.Get, sURL);
-                    var response = httpClient.SendAsync(request).Result;
+                    var response = httpClient.SendAsync(request).Result;    
 
                     if (response.StatusCode == System.Net.HttpStatusCode.OK)
                     {
@@ -81,7 +81,7 @@ namespace CLSF_Compare.Services
             return null; // No valid date found in the range
         }
 
-        private BOIRate ParseBOIRateLine(string line)
+        private BOIRate? ParseBOIRateLine(string line)
         {
             try
             {
