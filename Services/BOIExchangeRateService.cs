@@ -1,6 +1,7 @@
 using System;
 using System.Net.Http;
 using System.Linq;
+using System.Collections.Generic;
 using CLSF_Compare.Models;
 
 namespace CLSF_Compare.Services
@@ -9,76 +10,65 @@ namespace CLSF_Compare.Services
     {
         public decimal GetBOIRate(string sourceCurrency, string targetCurrency, DateTime date)
         {
-            DateTime? validDate = FindValidDate(sourceCurrency, targetCurrency, date);
+            // Try to find a valid date or fallback to an average rate if none exists
+            var rates = FindValidRatesInRange(sourceCurrency, targetCurrency, date, 7); // Initial range of 7 days
 
-            if (!validDate.HasValue)
+            if (!rates.Any())
             {
-                throw new Exception("No valid date found for fetching the exchange rate.");
+                throw new Exception("No valid date or rates found for fetching the exchange rate.");
             }
 
-            string sURL = $"https://edge.boi.gov.il/FusionEdgeServer/sdmx/v2/data/dataflow/BOI.STATISTICS/EXR/1.0?startperiod={validDate:yyyy-MM-dd}&endperiod={validDate:yyyy-MM-dd}&format=csv";
-
-            using (var httpClient = new HttpClient())
-            {
-                var request = new HttpRequestMessage(HttpMethod.Get, sURL);
-                var response = httpClient.SendAsync(request).Result;    // The .Result property blocks the current thread until the task is completed
-
-                if (response.StatusCode == System.Net.HttpStatusCode.OK)
-                {
-                    string csvResult = response.Content.ReadAsStringAsync().Result;
-
-                    // Parse the CSV response
-                    var lines = csvResult.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).Skip(1); // Skip the header
-
-                    foreach (var line in lines)
-                    {
-                        var rate = ParseBOIRateLine(line);
-
-                        if (rate != null && rate.BASE_CURRENCY == sourceCurrency && rate.COUNTER_CURRENCY == targetCurrency)
-                        {
-                            return rate.OBS_VALUE; // Return the OBS_VALUE for the relevant currency pair
-                        }
-                    }
-
-                    throw new Exception("No matching rate found for the specified currencies.");
-                }
-
-                throw new Exception($"Failed to retrieve data from BOI API. Status code: {response.StatusCode}");
-            }
+            // If we found valid rates, calculate and return the closest date’s rate
+            var closestRate = rates.OrderBy(rate => Math.Abs((rate.Key - date).Days)).First();
+            return closestRate.Value;
         }
 
-        private DateTime? FindValidDate(string sourceCurrency, string targetCurrency, DateTime date)
+        private Dictionary<DateTime, decimal> FindValidRatesInRange(string sourceCurrency, string targetCurrency, DateTime date, int initialRange)
         {
-            // Define a range of dates to check (7 days forward and backward)
-            const int range = 7;
-            var datesToCheck = Enumerable.Range(-range, 2 * range + 1)
-                                         .Select(offset => date.AddDays(offset))
-                                         .OrderBy(d => Math.Abs((d - date).Days)); // Closest dates first
+            int range = initialRange;
+            var allRates = new Dictionary<DateTime, decimal>();
 
             using (var httpClient = new HttpClient())
             {
-                foreach (var checkDate in datesToCheck)
+                while (range <= 30) // Dynamically expand the range if needed, up to 30 days
                 {
-                    string sURL = $"https://edge.boi.gov.il/FusionEdgeServer/sdmx/v2/data/dataflow/BOI.STATISTICS/EXR/1.0?startperiod={checkDate:yyyy-MM-dd}&endperiod={checkDate:yyyy-MM-dd}&format=csv";
+                    DateTime startDate = date.AddDays(-range);
+                    DateTime endDate = date.AddDays(range);
+
+                    // Construct a single API request for the entire range
+                    string sURL = $"https://edge.boi.gov.il/FusionEdgeServer/sdmx/v2/data/dataflow/BOI.STATISTICS/EXR/1.0?startperiod={startDate:yyyy-MM-dd}&endperiod={endDate:yyyy-MM-dd}&format=csv";
                     var request = new HttpRequestMessage(HttpMethod.Get, sURL);
-                    var response = httpClient.SendAsync(request).Result;    
+                    var response = httpClient.SendAsync(request).Result;
 
                     if (response.StatusCode == System.Net.HttpStatusCode.OK)
                     {
                         string csvResult = response.Content.ReadAsStringAsync().Result;
 
-                        // Check if data exists in the response
+                        // Parse all lines and collect valid rates for the given currency pair
                         var lines = csvResult.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).Skip(1);
-                        if (lines.Any(line => ParseBOIRateLine(line)?.BASE_CURRENCY == sourceCurrency &&
-                                              ParseBOIRateLine(line)?.COUNTER_CURRENCY == targetCurrency))
+                        foreach (var line in lines)
                         {
-                            return checkDate; // Found a valid date
+                            var rate = ParseBOIRateLine(line);
+                            if (rate != null && rate.BASE_CURRENCY == sourceCurrency && rate.COUNTER_CURRENCY == targetCurrency)
+                            {
+                                allRates[rate.TIME_PERIOD] = rate.OBS_VALUE;
+                            }
+                        }
+
+                        // If we found any valid rates, return them
+                        if (allRates.Any())
+                        {
+                            return allRates;
                         }
                     }
+
+                    // Increase the range and try again
+                    range += 7;
                 }
             }
 
-            return null; // No valid date found in the range
+            // Return all collected rates (could be empty if no data is found)
+            return allRates;
         }
 
         private BOIRate? ParseBOIRateLine(string line)
@@ -101,6 +91,7 @@ namespace CLSF_Compare.Services
                     PUB_WEBSITE = values[9],
                     UNIT_MULT = int.TryParse(values[10], out int unitMult) ? unitMult : 0,
                     COMMENTS = values[11],
+                    TIME_PERIOD = DateTime.TryParse(values[12], out var timePeriod) ? timePeriod : default,
                     OBS_VALUE = decimal.TryParse(values[13], out decimal obsValue) ? obsValue : 0
                 };
             }
