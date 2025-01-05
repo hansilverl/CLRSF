@@ -58,7 +58,7 @@ namespace CLSF_Compare.Services
                     DATA_SOURCE = values[6],
                     TIME_COLLECT = values[7],
                     CONF_STATUS = values[8],
-                    PUB_WEBSITE = values[9],
+                    PUB_WEBSITE = values[9],        
                     UNIT_MULT = int.TryParse(values[10], out int unitMult) ? unitMult : 0,
                     COMMENTS = values[11],
                     OBS_VALUE = decimal.TryParse(values[13], out decimal obsValue) ? obsValue : 0
