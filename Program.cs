@@ -12,12 +12,8 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 app.UseRouting();
 
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllerRoute(
-        name: "default",
-        pattern: "{controller=Calculator}/{action=ManualInput}/{id?}");
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Calculator}/{action=ManualInput}/{id?}");
 
-});
-
-app.Run();
+app.Run();  
