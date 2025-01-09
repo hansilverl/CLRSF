@@ -1,26 +1,27 @@
 @model CLSF_Compare.Models.InputModel
 
-<form method="post" asp-action="Calculate">
-    <label>Date:</label>
-    <input type="date" asp-for="Date" required />
-    
-    <label>Source Currency:</label>
-    <select asp-for="SourceCurrency" asp-items="@(new SelectList(CLSF_Compare.Models.CurrencyConstants.AllowedCurrencies))">
-        <option value="">Select a currency</option>
-    </select>
-    <label>Target Currency:</label>
-    <select asp-for="TargetCurrency" asp-items="@(new SelectList(CLSF_Compare.Models.CurrencyConstants.AllowedCurrencies))">
+<form method="post" asp-action="Calculate" class="manual-input-form">
+    <label class="manual-input-form__label" for="Date">Date:</label>
+    <input type="date" asp-for="Date" id="Date" class="manual-input-form__input" required />
+
+    <label class="manual-input-form__label" for="SourceCurrency">Source Currency:</label>
+    <select asp-for="SourceCurrency" asp-items="@(new SelectList(CLSF_Compare.Models.CurrencyConstants.AllowedCurrencies))" id="SourceCurrency" class="manual-input-form__select">
         <option value="">Select a currency</option>
     </select>
 
-    <label>Amount:</label>
-    <input type="number" asp-for="Amount" required />
-    
-    <label>Bank Rate:</label>
-    <input type="number" asp-for="BankRate" required step="0.0001" />
-    
-    <label>Bank Fees:</label> @*Some fees may be hard to find*@
-    <input type="number" asp-for="BankFees" step="0.01" />
-    
-    <button type="submit">Calculate</button>
+    <label class="manual-input-form__label" for="TargetCurrency">Target Currency:</label>
+    <select asp-for="TargetCurrency" asp-items="@(new SelectList(CLSF_Compare.Models.CurrencyConstants.AllowedCurrencies))" id="TargetCurrency" class="manual-input-form__select">
+        <option value="">Select a currency</option>
+    </select>
+
+    <label class="manual-input-form__label" for="Amount">Amount:</label>
+    <input type="number" asp-for="Amount" id="Amount" class="manual-input-form__input" required />
+
+    <label class="manual-input-form__label" for="BankRate">Bank Rate:</label>
+    <input type="number" asp-for="BankRate" id="BankRate" class="manual-input-form__input" required step="0.0001" />
+
+    <label class="manual-input-form__label" for="BankFees">Bank Fees:</label>
+    <input type="number" asp-for="BankFees" id="BankFees" class="manual-input-form__input" step="0.01" />
+
+    <button type="submit" class="manual-input-form__button">Calculate</button>
 </form>

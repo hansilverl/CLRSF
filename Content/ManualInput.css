@@ -1,0 +1,75 @@
+/* ManualInput.css */
+
+/* General form container styling */
+.manual-input-form {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 20px;
+    border: 1px solid #e6e6e6;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Form labels */
+.manual-input-form__label {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #333;
+    display: block;
+    margin-bottom: 8px;
+}
+
+/* Form inputs */
+.manual-input-form__input,
+.manual-input-form__select {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
+}
+
+.manual-input-form__input:focus,
+.manual-input-form__select:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+/* Submit button */
+.manual-input-form__button {
+    display: block;
+    width: 100%;
+    background-color: #007bff;
+    color: #fff;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.manual-input-form__button:hover {
+    background-color: #0056b3;
+}
+
+/* Add responsiveness */
+@media (max-width: 768px) {
+    .manual-input-form {
+        padding: 15px;
+    }
+
+    .manual-input-form__input,
+    .manual-input-form__select {
+        font-size: 0.9rem;
+    }
+
+    .manual-input-form__button {
+        font-size: 0.9rem;
+    }
+}
