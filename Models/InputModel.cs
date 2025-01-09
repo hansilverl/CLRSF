@@ -6,9 +6,10 @@ namespace CLSF_Compare.Models
         public string SourceCurrency { get; set; }
         public string TargetCurrency { get; set; }
         public decimal Amount { get; set; }
-        public decimal BankRate { get; set; }   // rate set by the bank
-        public decimal BankFees { get; set; }   // hidden fees charged by the bank (hard to find , might have to make optional)
+        public decimal BankRate { get; set; }
+        public decimal BankFees { get; set; }
     }
+}
     /* TODO:
     * ask mentor how different fees work, some may very by amount, 
     * Are we calculating by net or sale gross . 
@@ -19,4 +20,3 @@ namespace CLSF_Compare.Models
     * Bank formula (with hidden fees) - need to find out HOW to take fees - there may be a few fees to consider for the bank
     * Clearshift formula is amount * rate - fees
     */
-}

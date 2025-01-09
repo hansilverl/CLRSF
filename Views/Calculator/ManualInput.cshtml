@@ -3,15 +3,24 @@
 <form method="post" asp-action="Calculate">
     <label>Date:</label>
     <input type="date" asp-for="Date" required />
+    
     <label>Source Currency:</label>
-    <input type="text" asp-for="SourceCurrency" required />
+    <select asp-for="SourceCurrency" asp-items="@(new SelectList(CLSF_Compare.Models.CurrencyConstants.AllowedCurrencies))">
+        <option value="">Select a currency</option>
+    </select>
     <label>Target Currency:</label>
-    <input type="text" asp-for="TargetCurrency" required />
+    <select asp-for="TargetCurrency" asp-items="@(new SelectList(CLSF_Compare.Models.CurrencyConstants.AllowedCurrencies))">
+        <option value="">Select a currency</option>
+    </select>
+
     <label>Amount:</label>
     <input type="number" asp-for="Amount" required />
+    
     <label>Bank Rate:</label>
     <input type="number" asp-for="BankRate" required step="0.0001" />
+    
     <label>Bank Fees:</label>
     <input type="number" asp-for="BankFees" required step="0.01" />
+    
     <button type="submit">Calculate</button>
 </form>
