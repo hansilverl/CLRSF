@@ -19,8 +19,8 @@
     <label>Bank Rate:</label>
     <input type="number" asp-for="BankRate" required step="0.0001" />
     
-    <label>Bank Fees:</label>
-    <input type="number" asp-for="BankFees" required step="0.01" />
+    <label>Bank Fees:</label> @*Some fees may be hard to find*@
+    <input type="number" asp-for="BankFees" step="0.01" />
     
     <button type="submit">Calculate</button>
 </form>
