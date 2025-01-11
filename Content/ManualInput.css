@@ -6,7 +6,6 @@
     border-radius: 8px;
     background-color: var(--white);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    font-family: var(--font-family);
 }
 
 /* Form rows: Flex container for label and input */
@@ -40,6 +39,7 @@
     background: transparent; 
     transition: border-color 0.3s ease;
     color: var(--blue-sapphire);
+    font-family: inherit; /* Inherit font from parent */
 }
 
 .manual-input-form__input:focus,
