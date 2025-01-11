@@ -57,19 +57,3 @@
 .manual-input-form__button:hover {
     background-color: #0056b3;
 }
-
-/* Add responsiveness */
-@media (max-width: 768px) {
-    .manual-input-form {
-        padding: 15px;
-    }
-
-    .manual-input-form__input,
-    .manual-input-form__select {
-        font-size: 0.9rem;
-    }
-
-    .manual-input-form__button {
-        font-size: 0.9rem;
-    }
-}
