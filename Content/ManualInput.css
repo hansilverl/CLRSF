@@ -1,18 +1,19 @@
 .manual-input-form {
-    max-width: 600px;
+    max-width: 40%;
+    width: 90%;
     margin: 40px auto;
     padding: 20px;
     border: 1px solid var(--columbia-blue-2);
-    border-radius: 8px;
+    border-radius: 15px;
     background-color: var(--white);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px var(--moonstone);
 }
 
 /* Form rows: Flex container for label and input */
 .manual-input-form__row {
     display: flex;
     align-items: center; /* Vertically center label and input */
-    gap: 15px; 
+    gap: 1em; /* Space between label and input */
     margin-bottom: 25px; 
 }
 
@@ -27,10 +28,12 @@
     line-height: 1.5; /* Adjust line height for better text alignment */
 }
 
+
 /* Form inputs with underline */
 .manual-input-form__input,
 .manual-input-form__select {
     flex: 1; /* Inputs take up the remaining space */
+    width: 20%; 
     padding: 10px 0; /* Adjust padding for underline style */
     font-size: 1rem;
     border: none; /* Remove borders */
