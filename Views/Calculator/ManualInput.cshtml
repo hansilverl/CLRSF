@@ -8,6 +8,12 @@
     </div>
 
     <div class="manual-input-form__row">
+        <label class="manual-input-form__label" for="Amount">Amount:</label>
+        <input type="number" asp-for="Amount" id="Amount" class="manual-input-form__input" required />
+    </div>
+
+    
+    <div class="manual-input-form__row">
         <label class="manual-input-form__label" for="SourceCurrency">Source Currency:</label>
         <select asp-for="SourceCurrency" asp-items="@(new SelectList(CLSF_Compare.Models.CurrencyConstants.AllowedCurrencies))" id="SourceCurrency" class="manual-input-form__select">
             <option value=""></option>
@@ -21,10 +27,6 @@
         </select>
     </div>
 
-    <div class="manual-input-form__row">
-        <label class="manual-input-form__label" for="Amount">Amount:</label>
-        <input type="number" asp-for="Amount" id="Amount" class="manual-input-form__input" required />
-    </div>
 
     <div class="manual-input-form__row">
         <label class="manual-input-form__label" for="BankRate">Bank Rate:</label>
