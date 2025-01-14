@@ -1,7 +1,8 @@
 @model CLSF_Compare.Models.InputModel
 <link rel="stylesheet" href="~/Content/ManualInput.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/Content/variable.css" asp-append-version="true" />
-<form method="post" asp-action="Calculate" class="manual-input-form">
+
+<form id="manual-input-form" method="post" asp-action="ManualInput" class="manual-input-form">
     <div class="manual-input-form__row">
         <label class="manual-input-form__label" for="Date">Date:</label>
         <input type="date" asp-for="Date" id="Date" class="manual-input-form__input" required />
@@ -12,7 +13,6 @@
         <input type="number" asp-for="Amount" id="Amount" class="manual-input-form__input" required />
     </div>
 
-    
     <div class="manual-input-form__row">
         <label class="manual-input-form__label" for="SourceCurrency">Source Currency:</label>
         <select asp-for="SourceCurrency" asp-items="@(new SelectList(CLSF_Compare.Models.CurrencyConstants.AllowedCurrencies))" id="SourceCurrency" class="manual-input-form__select">
@@ -27,7 +27,6 @@
         </select>
     </div>
 
-
     <div class="manual-input-form__row">
         <label class="manual-input-form__label" for="BankRate">Bank Rate:</label>
         <input type="number" asp-for="BankRate" id="BankRate" class="manual-input-form__input" required step="0.0001" />
@@ -40,3 +39,14 @@
 
     <button type="submit" class="manual-input-form__button">Calculate</button>
 </form>
+
+<!-- This section will display the result of the calculation. -->
+<div id="result-container">
+    @if (ViewBag.Result != null)
+    {
+        <h2>Calculation Results</h2>
+        <p>Bank Conversion Cost: @ViewBag.Result.BankConversionCost</p>
+        <p>ClearShift Conversion Cost: @ViewBag.Result.ClearShiftConversionCost</p>
+        <p>Savings: @ViewBag.Result.Savings</p>
+    }
+</div>
