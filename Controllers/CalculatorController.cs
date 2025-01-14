@@ -18,7 +18,6 @@ namespace CLSF_Compare.Controllers
         {
             return View();
         }
-
         [HttpPost]
         public IActionResult Calculate(InputModel input)
         {
@@ -28,13 +27,13 @@ namespace CLSF_Compare.Controllers
 
                 var result = ConversionCalculationModel.Calculate(input.Amount, input.BankRate, input.BankFees, clearShiftRate);
 
-                return View("Result", result);
+                return PartialView("_ResultPartial", result);
             }
             catch (Exception ex)
             {
                 // Handle errors (e.g., API failures)
                 ModelState.AddModelError("", $"Error: {ex.Message}");
-                return View("ManualInput", input);
+                return PartialView("_ResultPartial", null);
             }
         }
     }

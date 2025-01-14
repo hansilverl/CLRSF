@@ -1,7 +1,8 @@
 @model CLSF_Compare.Models.InputModel
 <link rel="stylesheet" href="~/Content/ManualInput.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/Content/variable.css" asp-append-version="true" />
-<form method="post" asp-action="Calculate" class="manual-input-form">
+
+<form id="manual-input-form" method="post" asp-action="Calculate" class="manual-input-form">
     <div class="manual-input-form__row">
         <label class="manual-input-form__label" for="Date">Date:</label>
         <input type="date" asp-for="Date" id="Date" class="manual-input-form__input" required />
@@ -12,7 +13,6 @@
         <input type="number" asp-for="Amount" id="Amount" class="manual-input-form__input" required />
     </div>
 
-    
     <div class="manual-input-form__row">
         <label class="manual-input-form__label" for="SourceCurrency">Source Currency:</label>
         <select asp-for="SourceCurrency" asp-items="@(new SelectList(CLSF_Compare.Models.CurrencyConstants.AllowedCurrencies))" id="SourceCurrency" class="manual-input-form__select">
@@ -27,7 +27,6 @@
         </select>
     </div>
 
-
     <div class="manual-input-form__row">
         <label class="manual-input-form__label" for="BankRate">Bank Rate:</label>
         <input type="number" asp-for="BankRate" id="BankRate" class="manual-input-form__input" required step="0.0001" />
@@ -40,3 +39,24 @@
 
     <button type="submit" class="manual-input-form__button">Calculate</button>
 </form>
+
+<!-- This script will handle the form submission and update the result container with the result of the calculation. -->
+<div id="result-container">
+    @await Html.PartialAsync("_ResultPartial", null)
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#manual-input-form').submit(function (event) {
+            event.preventDefault();
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("Calculate", "Calculator")',
+                data: $(this).serialize(),
+                success: function (result) {
+                    $('#result-container').html(result);
+                }
+            });
+        });
+    });
+</script>
