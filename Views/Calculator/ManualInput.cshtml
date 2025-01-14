@@ -2,7 +2,7 @@
 <link rel="stylesheet" href="~/Content/ManualInput.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/Content/variable.css" asp-append-version="true" />
 
-<form id="manual-input-form" method="post" asp-action="Calculate" class="manual-input-form">
+<form id="manual-input-form" method="post" asp-action="ManualInput" class="manual-input-form">
     <div class="manual-input-form__row">
         <label class="manual-input-form__label" for="Date">Date:</label>
         <input type="date" asp-for="Date" id="Date" class="manual-input-form__input" required />
@@ -40,23 +40,13 @@
     <button type="submit" class="manual-input-form__button">Calculate</button>
 </form>
 
-<!-- This script will handle the form submission and update the result container with the result of the calculation. -->
+<!-- This section will display the result of the calculation. -->
 <div id="result-container">
-    @await Html.PartialAsync("_ResultPartial", null)
+    @if (ViewBag.Result != null)
+    {
+        <h2>Calculation Results</h2>
+        <p>Bank Conversion Cost: @ViewBag.Result.BankConversionCost</p>
+        <p>ClearShift Conversion Cost: @ViewBag.Result.ClearShiftConversionCost</p>
+        <p>Savings: @ViewBag.Result.Savings</p>
+    }
 </div>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script>
-    $(document).ready(function () {
-        $('#manual-input-form').submit(function (event) {
-            event.preventDefault();
-            $.ajax({
-                type: 'POST',
-                url: '@Url.Action("Calculate", "Calculator")',
-                data: $(this).serialize(),
-                success: function (result) {
-                    $('#result-container').html(result);
-                }
-            });
-        });
-    });
-</script>
