@@ -42,11 +42,5 @@
 
 <!-- This section will display the result of the calculation. -->
 <div id="result-container">
-    @if (ViewBag.Result != null)
-    {
-        <h2>Calculation Results</h2>
-        <p>Bank Conversion Cost: @ViewBag.Result.BankConvertedAmount</p>
-        <p>ClearShift Conversion Cost: @ViewBag.Result.ClearShiftConvertedAmount</p>
-        <p>Savings: @ViewBag.Result.Savings</p>
-    }
+    @await Html.PartialAsync("_ResultPartial", (object)ViewBag.Result)
 </div>
