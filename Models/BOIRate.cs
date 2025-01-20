@@ -1,4 +1,3 @@
-// redo this model to match the data from the API
 namespace CLSF_Compare.Models
 {
     public class BOIRate

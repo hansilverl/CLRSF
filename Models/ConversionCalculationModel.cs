@@ -1,3 +1,4 @@
+
 namespace CLSF_Compare.Models
 {
     public class ConversionCalculationModel
