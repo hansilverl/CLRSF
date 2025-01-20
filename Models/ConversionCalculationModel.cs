@@ -2,6 +2,7 @@ namespace CLSF_Compare.Models
 {
     public class ConversionCalculationModel
     {
+        private const decimal CS_fee = 0.5m; // differs between personal and business accounts, but leaving it abstract for now
         public decimal BankConvertedAmount { get; set; }
         public decimal ClearShiftConvertedAmount { get; set; }
         public decimal Savings { get; set; }
@@ -10,23 +11,18 @@ namespace CLSF_Compare.Models
         {
             // default bank fees to 1.25% if not provided
             bankFees = bankFees == 0 ? 1.25m : bankFees;
-            var b_ConvertedAmount = amount * bankRate;
-            var cs_ConvertedAmount = amount * clearShiftRate;
-
-            var b_Fees = amount * bankFees;
-            // clearShift has one fee of 0.25%
-            var cs_Fees = amount * (0.25m / 100);
-
-            /* Because rate exchange will usually be higher than bank rate,
-             So by using ClearShift we "gain"/save cs_ConvertedAmount - b_ConvertedAmount
-             we also need to take into account the fees, so we need to subtract the fees from the "gain"  */
-            var savings = (cs_ConvertedAmount - b_ConvertedAmount) - (b_Fees - cs_Fees);
+            // we'll remove the fees BEFORE applying the rate(so we're calculating how much you get in your account at the end)
+            var bankAmount = amount - (amount * (bankFees / 100));
+            var bankCalc = bankRate > 1 ? bankAmount * bankRate : bankAmount / (1m / bankRate);
+            
+            var csAmount = amount - (amount * (CS_fee / 100));
+            var csCalc = clearShiftRate > 1 ? csAmount * clearShiftRate : csAmount / (1m / clearShiftRate);
 
             return new ConversionCalculationModel
             {
-                BankConvertedAmount = b_ConvertedAmount,
-                ClearShiftConvertedAmount = cs_ConvertedAmount,
-                Savings = savings
+                BankConvertedAmount = bankCalc,
+                ClearShiftConvertedAmount = csCalc, // you'd save more by using the ClearShift, cs_conv - bank_conv
+                Savings = csCalc - bankCalc
             };
         }
     }
