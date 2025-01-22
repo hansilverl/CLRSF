@@ -1,3 +1,4 @@
+// Controllers/CalculatorController.cs
 using Microsoft.AspNetCore.Mvc;
 using CLSF_Compare.Models;
 using CLSF_Compare.Services;
@@ -13,31 +14,24 @@ namespace CLSF_Compare.Controllers
             _exchangeRateService = exchangeRateService;
         }
 
-        [HttpGet]
-        public IActionResult ManualInput()
+        public IActionResult Index()
         {
             return View();
         }
 
         [HttpPost]
-        public IActionResult ManualInput(InputModel input)
+        public IActionResult Calculate(InputModel input)
         {
             try
             {
                 var clearShiftRate = _exchangeRateService.GetBOIRate(input.SourceCurrency, input.TargetCurrency, input.Date);
-
                 var result = ConversionCalculationModel.Calculate(input.Amount, input.BankRate, input.BankFees, clearShiftRate);
-
-                ViewBag.Result = result;
+                return Json(result);
             }
             catch (Exception ex)
             {
-                // Handle errors (e.g., API failures)
-                ModelState.AddModelError("", $"Error: {ex.Message}");
-                ViewBag.Result = null;
+                return Json(new { error = ex.Message });
             }
-
-            return View(input);
         }
     }
 }
