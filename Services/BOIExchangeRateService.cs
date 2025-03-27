@@ -11,7 +11,7 @@ namespace CLSF_Compare.Services
         public decimal GetBOIRate(string sourceCurrency, string targetCurrency, DateTime date)
         {
             // Try to find a valid date or fallback to an average rate if none exists
-            var rates = FindValidRatesInRange(sourceCurrency, targetCurrency, date, 7); // Initial range of 7 days
+            var rates = FindValidRatesInRange(sourceCurrency, targetCurrency, date); 
 
             if (!rates.Any())
             {
@@ -23,9 +23,9 @@ namespace CLSF_Compare.Services
             return closestRate.Value;
         }
 
-        private Dictionary<DateTime, decimal> FindValidRatesInRange(string sourceCurrency, string targetCurrency, DateTime date, int initialRange)
+        private Dictionary<DateTime, decimal> FindValidRatesInRange(string sourceCurrency, string targetCurrency, DateTime date)
         {
-            int range = initialRange;
+            int range = 7; // Initial range of 7 days
             var allRates = new Dictionary<DateTime, decimal>();
 
             using (var httpClient = new HttpClient())
