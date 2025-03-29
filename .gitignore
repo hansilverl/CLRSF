@@ -1,0 +1,201 @@
+# .gitignore file created for free with Tower (https://www.git-tower.com/)
+# For suggestions or improvements please contact us using support@git-tower.com
+# Generated on 2025-03-29
+# Includes: csharp, dotnet, css, html, visual_studio, msbuild
+
+### Universal ###
+# Common files that should be ignored in all projects
+
+# Logs
+*.log
+# Temporary files
+*.tmp
+*~
+
+*.bak
+# Environment files (containing secrets, API keys, credentials)
+.env
+*.env
+.env.*
+
+# Local configuration that shouldn't be shared
+*.local
+
+### Csharp ###
+# csharp specific files
+
+bin/
+obj/
+*.user
+*.suo
+
+### Dotnet ###
+# .NET build outputs and development files
+
+bin/
+obj/
+*.user
+*.userosscache
+*.sln.docstates
+
+.vs/
+*_i.c
+*_p.c
+*.ncb
+*.suo
+
+*.tlb
+*.tlh
+*.bak
+*.cache
+*.ilk
+
+*.log
+*.lib
+*.sbr
+*.sdf
+packages/
+
+TestResults/
+[Bb]in/
+[Dd]ebug/
+[Rr]elease/
+
+### Css ###
+# css specific files
+
+*.css.map
+.sass-cache/
+*.scssc
+
+### Html ###
+# html specific files
+
+*.html
+*.htm
+.DS_Store
+
+### Visual_studio ###
+# visual_studio editor specific files
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+
+*.sln.docstates
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+
+x64/
+x86/
+build/
+bld/
+[Bb]in/
+
+[Oo]bj/
+[Ll]og/
+.vs/
+*.VisualState.xml
+TestResult.xml
+
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+*.VisualState.xml
+*.psess
+*.vsp
+
+*.vspx
+*.sap
+ipch/
+*.aps
+*.ncb
+
+*.opendb
+*.opensdf
+*.sdf
+*.cachefile
+*.VC.db
+
+*.VC.VC.opendb
+*.coverage
+*.coveragexml
+_UpgradeReport_Files/
+Backup*/
+
+UpgradeLog*.XML
+UpgradeLog*.htm
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+
+[Ll]ogs/
+Generated\ Files/
+BenchmarkDotNet.Artifacts/
+ScaffoldingReadMe.txt
+StyleCopReport.xml
+
+*_wpftmp.csproj
+.axoCover/*
+!.axoCover/settings.json
+coverage*.json
+coverage*.xml
+
+coverage*.info
+.vshistory/
+healthchecksdb
+
+### Msbuild ###
+# msbuild build tool specific files
+
+# MSBuild
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+
+x64/
+x86/
+[Bb]uild/
+*.user
+*.aps
+
+*.pch
+*.vspscc
+*.vssscc
+.builds
+*.pidb
+
+*.svclog
+*.scc
+_UpgradeReport_Files/
+Backup*/
+UpgradeLog*.XML
+
+UpgradeLog*.htm
+
+
+### jQuery ###
+# jQuery specific files
+
+*.jquery.json
+*.map
+jquery*.js
+jquery*.min.js
+
+### Bootstrap ###
+# Bootstrap specific files
+
+*.css.map
+*.js.map
+bootstrap*.css
+bootstrap*.min.css
+bootstrap*.js
+bootstrap*.min.js
+
+
+lib/
+js/
