@@ -48,10 +48,14 @@
                             </div>
 
                             <div class="col-md-6">
-                                <label asp-for="BankFees" class="form-label">Bank Fees</label>
-                                <input asp-for="BankFees" type="number" step="any" class="form-control" />
+                                <label asp-for="BankFees" class="form-label">Bank Fees (%)</label>
+                                <div class="input-group">
+                                    <input asp-for="BankFees" type="number" step="any" class="form-control" />
+                                    <span class="input-group-text">%</span>
+                                </div>
                                 <span asp-validation-for="BankFees" class="text-danger small"></span>
                             </div>
+
 
                             <div class="col-md-6">
                                 <label asp-for="Amount" class="form-label">Amount to Convert</label>
