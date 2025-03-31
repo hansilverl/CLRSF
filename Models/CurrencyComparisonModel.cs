@@ -26,6 +26,9 @@ namespace CurrencyComparisonTool.Models
         [Required]
         public string TargetCurrency { get; set; } = "ILS";
 
+        private const decimal CS_fee = 0.5m; // differs between personal and business accounts, but leaving it abstract for now
+
+
         public decimal BankCost { get; set; }
         public decimal ClearshiftCost { get; set; }
         public decimal Savings { get; set; }
