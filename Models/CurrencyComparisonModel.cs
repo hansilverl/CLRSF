@@ -44,7 +44,7 @@ namespace CurrencyComparisonTool.Models
 
             model.BankCost = bankCalc;
             model.ClearshiftCost = csCalc; // you'd save more by using the ClearShift, cs_conv - bank_conv
-            model.Savings = csCalc - bankCalc;
+            model.Savings = bankCalc - csCalc;
 
             return model;
         }
