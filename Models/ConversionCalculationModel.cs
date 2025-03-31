@@ -13,6 +13,7 @@ namespace CLSF_Compare.Models
             // default bank fees to 1.25% if not provided
             bankFees = bankFees == 0 ? 1.25m : bankFees;
             // we'll remove the fees BEFORE applying the rate(so we're calculating how much you get in your account at the end)
+            // check if bank fee is in
             var bankAmount = amount - (amount * (bankFees / 100));
             var bankCalc = bankRate > 1 ? bankAmount * bankRate : bankAmount / (1m / bankRate);
             
@@ -23,7 +24,7 @@ namespace CLSF_Compare.Models
             {
                 BankConvertedAmount = bankCalc,
                 ClearShiftConvertedAmount = csCalc, // you'd save more by using the ClearShift, cs_conv - bank_conv
-                Savings = csCalc - bankCalc
+                Savings = bankCalc - csCalc
             };
         }
     }

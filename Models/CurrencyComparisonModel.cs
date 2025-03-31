@@ -9,6 +9,7 @@ namespace CurrencyComparisonTool.Models
         public DateTime Date { get; set; } = DateTime.Now;
 
         [Required]
+        [Range(0.0001, double.MaxValue, ErrorMessage = "Bank Rate must be positive")]
         public decimal BankRate { get; set; }
 
         [Required]
@@ -29,8 +30,9 @@ namespace CurrencyComparisonTool.Models
         public decimal ClearshiftCost { get; set; }
         public decimal Savings { get; set; }
 
-        public static CurrencyComparisonModel Calculate(CurrencyComparisonModel model,decimal clearshiftRate)
+        public static CurrencyComparisonModel Calculate(CurrencyComparisonModel model, decimal clearshiftRate)
         {
+
             // default bank fees to 1.25% if not provided
             model.BankFees = model.BankFees == 0 ? 1.25m : model.BankFees;
             // we'll remove the fees BEFORE applying the rate(so we're calculating how much you get in your account at the end)
@@ -46,7 +48,5 @@ namespace CurrencyComparisonTool.Models
 
             return model;
         }
-
-        
     }
 }
