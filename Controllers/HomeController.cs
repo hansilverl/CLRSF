@@ -23,8 +23,9 @@ namespace CurrencyComparisonTool.Controllers
         public IActionResult Calculate(CurrencyComparisonModel model)
         {
             if (ModelState.IsValid)
-            {
+            {   Console.WriteLine($"ModelState is valid: {model.Date} {model.SourceCurrency} {model.TargetCurrency} {model.Amount} {model.BankRate} {model.BankFees}");
                 var clearShiftRate = _exchangeRateService.GetBOIRate(model.SourceCurrency, model.TargetCurrency, model.Date);
+                Console.WriteLine($"ClearShift Rate: {clearShiftRate}");
                 model = CurrencyComparisonModel.Calculate(model, clearShiftRate);
             }
             return View("Index", model);

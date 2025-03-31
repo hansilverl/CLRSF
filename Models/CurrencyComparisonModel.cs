@@ -12,7 +12,6 @@ namespace CurrencyComparisonTool.Models
         [Range(0.0001, double.MaxValue, ErrorMessage = "Bank Rate must be positive")]
         public decimal BankRate { get; set; }
 
-        [Required]
         [Range(0, double.MaxValue, ErrorMessage = "Bank Fees must be non-negative")]
         public decimal BankFees { get; set; }
 
@@ -26,11 +25,11 @@ namespace CurrencyComparisonTool.Models
         [Required]
         public string TargetCurrency { get; set; } = "ILS";
 
-        private const decimal CS_fee = 0.5m; // differs between personal and business accounts, but leaving it abstract for now
+        private const decimal CS_fee = 0.5M; // differs between personal and business accounts, but leaving it abstract for now
 
 
-        public decimal BankCost { get; set; }
-        public decimal ClearshiftCost { get; set; }
+        public decimal b_convertedAmount { get; set; }
+        public decimal cs_convertedAmount { get; set; }
         public decimal Savings { get; set; }
 
         public static CurrencyComparisonModel Calculate(CurrencyComparisonModel model, decimal clearshiftRate)
@@ -38,16 +37,13 @@ namespace CurrencyComparisonTool.Models
 
             // default bank fees to 1.25% if not provided
             model.BankFees = model.BankFees == 0 ? 1.25m : model.BankFees;
-            // we'll remove the fees BEFORE applying the rate(so we're calculating how much you get in your account at the end)
-            var bankAmount = model.Amount - (model.Amount * (model.BankFees / 100));
-            var bankCalc = model.BankRate > 1 ? bankAmount * model.BankRate : bankAmount / (1m / model.BankRate);
 
-            var csAmount = model.Amount - (model.Amount * (0.5m / 100)); // CS fee is 0.5%
-            var csCalc = clearshiftRate > 1 ? csAmount * clearshiftRate : csAmount / (1m / clearshiftRate);
-
-            model.BankCost = bankCalc;
-            model.ClearshiftCost = csCalc; // you'd save more by using the ClearShift, cs_conv - bank_conv
-            model.Savings = bankCalc - csCalc;
+            // Calculate the converted amount for the bank
+            model.b_convertedAmount = (model.Amount * model.BankRate) * (1 - (model.BankFees / 100));
+            // Calculate the converted amount for ClearShift
+            model.cs_convertedAmount = (model.Amount * clearshiftRate) * (1 - (CS_fee / 100));
+            // Calculate the savings, with clearshift I should end up with more money than the bank
+            model.Savings = model.cs_convertedAmount - model.b_convertedAmount;
 
             return model;
         }
