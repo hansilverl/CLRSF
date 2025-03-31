@@ -1,4 +1,4 @@
-namespace CLSF_Compare.Services
+namespace CurrencyComparisonTool.Services
 {
     public interface IExchangeRateService
     {

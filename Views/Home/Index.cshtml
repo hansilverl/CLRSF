@@ -42,11 +42,13 @@
                             </div>
                             <div class="col-md-6">
                                 <label asp-for="BankRate" class="form-label">Bank Exchange Rate</label>
-                                <input asp-for="BankRate" type="number" step="0.0001" class="form-control" placeholder="Enter rate" />
+                                <input asp-for="BankRate" type="number" step="0.0001" class="form-control"
+                                    placeholder="Enter rate" />
                             </div>
                             <div class="col-md-6">
                                 <label asp-for="BankFees" class="form-label">Bank Fees</label>
-                                <input asp-for="BankFees" type="number" class="form-control" placeholder="Enter bank fees" />
+                                <input asp-for="BankFees" type="number" step="any" class="form-control"
+                                    placeholder="Enter bank fees" />
                             </div>
                             <div class="col-md-6">
                                 <label asp-for="Amount" class="form-label">Amount to Convert</label>

@@ -1,4 +1,4 @@
-namespace CLSF_Compare.Models
+namespace CurrencyComparisonTool.Models
 {
     public static class CurrencyConstants
     {

@@ -2,9 +2,9 @@ using System;
 using System.Net.Http;
 using System.Linq;
 using System.Collections.Generic;
-using CLSF_Compare.Models;
+using CurrencyComparisonTool.Models;
 
-namespace CLSF_Compare.Services
+namespace CurrencyComparisonTool.Services
 {
     public class BOIExchangeRateService : IExchangeRateService
     {

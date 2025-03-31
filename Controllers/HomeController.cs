@@ -1,11 +1,19 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using CurrencyComparisonTool.Models;
+using CurrencyComparisonTool.Services;
+
+
 
 namespace CurrencyComparisonTool.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly IExchangeRateService _exchangeRateService;
+        public HomeController(IExchangeRateService exchangeRateService)
+        {
+            _exchangeRateService = exchangeRateService;
+        }
         public IActionResult Index()
         {
             return View(new CurrencyComparisonModel());
@@ -16,7 +24,8 @@ namespace CurrencyComparisonTool.Controllers
         {
             if (ModelState.IsValid)
             {
-                model = CurrencyComparisonModel.Calculate(model);
+                var clearShiftRate = _exchangeRateService.GetBOIRate(model.SourceCurrency, model.TargetCurrency, model.Date);
+                model = CurrencyComparisonModel.Calculate(model, clearShiftRate);
             }
             return View("Index", model);
         }
