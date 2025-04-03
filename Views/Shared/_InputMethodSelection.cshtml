@@ -1,18 +1,17 @@
 @model CurrencyComparisonModel
 
 <div class="card mb-4">
-  <div class="card-body p-0">
-    <div class="nav nav-tabs" id="input-tabs" role="tablist">
-      <button class="nav-link d-flex align-items-center" id="upload-tab" data-bs-toggle="tab" data-bs-target="#upload-panel" type="button" role="tab">
-        <i class="bi bi-upload me-2"></i> Upload Bank File
-      </button>
-      <button class="nav-link active d-flex align-items-center" id="manual-tab" data-bs-toggle="tab" data-bs-target="#manual-panel" type="button" role="tab">
-        <i class="bi bi-pencil me-2"></i> Manual Input
-      </button>
-      <button class="nav-link d-flex align-items-center" id="custom-tab" data-bs-toggle="tab" data-bs-target="#custom-panel" type="button" role="tab">
-        <i class="bi bi-file-text me-2"></i> Custom Text File
-      </button>
-    </div>
+<div class="nav nav-tabs justify-content-center" id="input-tabs" role="tablist">
+  <button class="nav-link d-flex align-items-center text-center px-4" id="upload-tab" data-bs-toggle="tab" data-bs-target="#upload-panel" type="button" role="tab">
+    <i class="bi bi-upload me-2"></i> Upload Bank File
+  </button>
+  <button class="nav-link active d-flex align-items-center text-center px-4" id="manual-tab" data-bs-toggle="tab" data-bs-target="#manual-panel" type="button" role="tab">
+    <i class="bi bi-pencil me-2"></i> Manual Input
+  </button>
+  <button class="nav-link d-flex align-items-center text-center px-4" id="custom-tab" data-bs-toggle="tab" data-bs-target="#custom-panel" type="button" role="tab">
+    <i class="bi bi-file-text me-2"></i> Custom Text File
+  </button>
+</div>
     
     <div class="tab-content p-4" id="input-tabContent">
       <div class="tab-pane fade" id="upload-panel" role="tabpanel">
@@ -72,7 +71,7 @@
               </select>
             </div>
             <div class="col-12 text-center mt-4">
-              <button type="submit" class="btn btn-primary px-4 py-2">Calculate Savings</button>
+                <button type="submit" class="btn btn-primary">Submit</button>
             </div>
           </div>
         </form>
