@@ -36,7 +36,7 @@ namespace CurrencyComparisonTool.Services
                     DateTime endDate = date.AddDays(range);
 
                     // Construct a single API request for the entire range
-                    string sURL = $"https://edge.boi.gov.il/FusionEdgeServer/sdmx/v2/data/dataflow/BOI.STATISTICS/EXR/1.0?startperiod={startDate:yyyy-MM-dd}&endperiod={endDate:yyyy-MM-dd}&format=csv";
+                    string sURL = $"https://edge.boi.gov.il/FusionEdgeServer/sdmx/v2/data/dataflow/BOI.STATISTICS/EXR/1.0?c%5BDATA_TYPE%5D=OF00&startperiod={startDate:yyyy-MM-dd}&endperiod={endDate:yyyy-MM-dd}&format=csv";
                     var request = new HttpRequestMessage(HttpMethod.Get, sURL);
                     var response = httpClient.SendAsync(request).Result;
 
