@@ -1,4 +1,4 @@
-@model CurrencyComparisonModel
+﻿@model CurrencyComparisonModel
 
 <div class="card mb-4">
 <div class="nav nav-tabs justify-content-center" id="input-tabs" role="tablist">
@@ -14,20 +14,65 @@
 </div>
     
     <div class="tab-content p-4" id="input-tabContent">
-      <div class="tab-pane fade" id="upload-panel" role="tabpanel">
-        <div class="border-dashed drag-drop-area">
-          <div class="text-center py-5 px-3">
-            <div class="upload-icon mb-3">
-              <i class="bi bi-upload me-2"></i>
-            </div>
-            <p class="text-secondary mb-4">Drag and drop your bank file here, or click to browse</p>
-                    <form asp-controller="Calculator" asp-action="UploadCsv" enctype="multipart/form-data" method="post">
-                        <input type="file" name="file" class="btn btn-primary" onchange="this.form.submit()" />
-                    </form>
+        <div class="tab-pane fade" id="upload-panel" role="tabpanel">
+            <form asp-controller="Calculator"
+                  asp-action="UploadCsv"
+                  enctype="multipart/form-data"
+                  method="post"
+                  id="uploadForm">
+                <div id="dropArea"
+                     style="border:2px dashed #007bff;
+                padding:50px;
+                text-align:center;
+                cursor:pointer;
+                border-radius:10px;">
+                    <i class="bi bi-cloud-arrow-up-fill"
+                       style="font-size:48px;
+                color:#007bff;"></i>
+                    <p style="margin-top:10px;">
+                        Drag &amp; Drop your bank file here or click to browse
+                    </p>
+                    <input type="file"
+                           name="file"
+                           id="fileInput"
+                           style="display:none;" />
+                </div>
+            </form>
+        </div>
+        
+        <script>
+                  // Prevent default browser drag/drop on whole window
+                  window.addEventListener('dragover', e => { e.preventDefault(); e.stopPropagation(); }, false);
+                  window.addEventListener('drop',     e => { e.preventDefault(); e.stopPropagation(); }, false);
 
-          </div>
-        </div>  
-      </div>
+                  const dropArea   = document.getElementById('dropArea');
+                  const fileInput  = document.getElementById('fileInput');
+                  const uploadForm = document.getElementById('uploadForm');
+
+                  // Click → open file picker
+                  dropArea.addEventListener('click', () => fileInput.click());
+
+                  // Drag over → highlight area
+                  dropArea.addEventListener('dragover', e => {
+                    e.preventDefault();
+                    dropArea.style.backgroundColor = '#e9ecef';
+                  }, false);
+
+                  // Drag leave → remove highlight
+                  dropArea.addEventListener('dragleave', e => {
+                    e.preventDefault();
+                    dropArea.style.backgroundColor = 'transparent';
+                  }, false);
+
+                  // Drop → set files & submit
+                  dropArea.addEventListener('drop', e => {
+                    e.preventDefault();
+                    dropArea.style.backgroundColor = 'transparent';
+                    fileInput.files = e.dataTransfer.files;
+                    uploadForm.submit();
+                  }, false);
+        </script>
+
       
       <div class="tab-pane fade show active" id="manual-panel" role="tabpanel">
         <form asp-action="Calculate" method="post">
