@@ -1,40 +1,69 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using CurrencyComparisonTool.Models;
+using CLSF_Compare.Models;
+using CLSF_Compare.Services;
 using CurrencyComparisonTool.Services;
 
-
-
-namespace CurrencyComparisonTool.Controllers
+namespace CLSF_Compare.Controllers
 {
-    public class HomeController : Controller
+    public class CalculatorController : Controller
     {
         private readonly IExchangeRateService _exchangeRateService;
-        public HomeController(IExchangeRateService exchangeRateService)
+
+        public CalculatorController(IExchangeRateService exchangeRateService)
         {
             _exchangeRateService = exchangeRateService;
         }
-        public IActionResult Index()
+
+        [HttpGet]
+        public IActionResult ManualInput()
         {
-            return View(new CurrencyComparisonModel());
+            return View();
         }
 
         [HttpPost]
-        public IActionResult Calculate(CurrencyComparisonModel model)
+        public IActionResult ManualInput(InputModel input)
         {
-            if (ModelState.IsValid)
-            {   Console.WriteLine($"ModelState is valid: {model.Date} {model.SourceCurrency} {model.TargetCurrency} {model.Amount} {model.BankRate} {model.BankFees}");
-                var clearShiftRate = _exchangeRateService.GetBOIRate(model.SourceCurrency, model.TargetCurrency, model.Date);
-                Console.WriteLine($"ClearShift Rate: {clearShiftRate}");
-                model = CurrencyComparisonModel.Calculate(model, clearShiftRate);
+            try
+            {
+                var clearShiftRate = _exchangeRateService.GetBOIRate(input.SourceCurrency, input.TargetCurrency, input.Date);
+
+                var result = ConversionCalculationModel.Calculate(input.Amount, input.BankRate, input.BankFees, clearShiftRate);
+
+                ViewBag.Result = result;
             }
-            return View("Index", model);
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", $"Error: {ex.Message}");
+                ViewBag.Result = null;
+            }
+
+            return View(input);
         }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        [HttpPost]
+        public async Task<IActionResult> UploadCsv(IFormFile file)
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest("No file selected.");
+            }
+
+            List<string[]> csvData = new List<string[]>();
+
+            using (var stream = new StreamReader(file.OpenReadStream()))
+            {
+                while (!stream.EndOfStream)
+                {
+                    var line = await stream.ReadLineAsync();
+                    var values = line.Split(',');
+                    csvData.Add(values);
+                }
+            }
+
+            ViewBag.CsvData = csvData;
+
+            return View("Upload");
         }
-    }
+
+    } 
 }
