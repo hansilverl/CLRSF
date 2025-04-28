@@ -21,9 +21,12 @@
               <i class="bi bi-upload me-2"></i>
             </div>
             <p class="text-secondary mb-4">Drag and drop your bank file here, or click to browse</p>
-            <button class="btn btn-primary">Select File</button>
+                    <form asp-controller="Calculator" asp-action="UploadCsv" enctype="multipart/form-data" method="post">
+                        <input type="file" name="file" class="btn btn-primary" onchange="this.form.submit()" />
+                    </form>
+
           </div>
-        </div>
+        </div>  
       </div>
       
       <div class="tab-pane fade show active" id="manual-panel" role="tabpanel">
