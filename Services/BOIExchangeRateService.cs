@@ -10,15 +10,36 @@ namespace CurrencyComparisonTool.Services
     {
         public decimal GetBOIRate(string sourceCurrency, string targetCurrency, DateTime date)
         {
-            // Try to find a valid date or fallback to an average rate if none exists
-            var rates = FindValidRatesInRange(sourceCurrency, targetCurrency, date); 
+            if (sourceCurrency == targetCurrency)
+                return 1.0m;
+
+            if (targetCurrency == "ILS")
+            {
+                return GetDirectRate(sourceCurrency, "ILS", date);
+            }
+
+            if (sourceCurrency == "ILS")
+            {
+                var targetToILSRate = GetDirectRate(targetCurrency, "ILS", date);
+                return 1 / targetToILSRate;
+            }
+
+            // Both currencies are non-ILS, calculate cross rate
+            var sourceToILS = GetDirectRate(sourceCurrency, "ILS", date);
+            var targetToILS = GetDirectRate(targetCurrency, "ILS", date);
+
+            return sourceToILS / targetToILS;
+        }
+
+        private decimal GetDirectRate(string fromCurrency, string toCurrency, DateTime date)
+        {
+            var rates = FindValidRatesInRange(fromCurrency, toCurrency, date);
 
             if (!rates.Any())
             {
-                throw new Exception("No valid date or rates found for fetching the exchange rate.");
+                throw new Exception($"No valid rate found from {fromCurrency} to {toCurrency}");
             }
 
-            // If we found valid rates, calculate and return the closest date’s rate
             var closestRate = rates.OrderBy(rate => Math.Abs((rate.Key - date).Days)).First();
             return closestRate.Value;
         }
@@ -36,7 +57,7 @@ namespace CurrencyComparisonTool.Services
                     DateTime endDate = date.AddDays(range);
 
                     // Construct a single API request for the entire range
-                    string sURL = $"https://edge.boi.gov.il/FusionEdgeServer/sdmx/v2/data/dataflow/BOI.STATISTICS/EXR/1.0?c%5BDATA_TYPE%5D=OF00&startperiod={startDate:yyyy-MM-dd}&endperiod={endDate:yyyy-MM-dd}&format=csv";
+                    string sURL = $"https://edge.boi.gov.il/FusionEdgeServer/sdmx/v2/data/dataflow/BOI.STATISTICS/EXR/1.0?RER_{sourceCurrency}_{targetCurrency}&c%5BDATA_TYPE%5D=OF00&startperiod={startDate:yyyy-MM-dd}&endperiod={endDate:yyyy-MM-dd}&format=csv";
                     var request = new HttpRequestMessage(HttpMethod.Get, sURL);
                     var response = httpClient.SendAsync(request).Result;
 
