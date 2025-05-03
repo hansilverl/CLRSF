@@ -1,4 +1,8 @@
 @model CurrencyComparisonModel
+@{
+    // Get all currencies except ILS to create necessary validation lists
+    var nonIlsCurrencies = CurrencyConstants.AllowedCurrencies.Where(c => c != "ILS").ToList();
+}
 
 <div class="card mb-4">
 <div class="nav nav-tabs justify-content-center" id="input-tabs" role="tablist">
@@ -54,7 +58,7 @@
             </div>
             <div class="col-md-6">
               <label asp-for="SourceCurrency" class="form-label">Source Currency</label>
-              <select asp-for="SourceCurrency" class="form-select">
+              <select asp-for="SourceCurrency" class="form-select" id="sourceCurrency" onchange="synchronizeCurrencies('source')">
                 @foreach (var currency in CurrencyConstants.AllowedCurrencies)
                 {
                   <option value="@currency">@currency</option>
@@ -63,7 +67,7 @@
             </div>
             <div class="col-md-6">
               <label asp-for="TargetCurrency" class="form-label">Target Currency</label>
-              <select asp-for="TargetCurrency" class="form-select">
+              <select asp-for="TargetCurrency" class="form-select" id="targetCurrency" onchange="synchronizeCurrencies('target')">
                 @foreach (var currency in CurrencyConstants.AllowedCurrencies)
                 {
                   <option value="@currency">@currency</option>
@@ -91,3 +95,52 @@
     </div>
   </div>
 </div>
+
+@* Razor syntax for handling the currency synchronization without JavaScript *@
+@{
+    // Make sure one currency is always ILS by default
+    if (Model.SourceCurrency != "ILS" && Model.TargetCurrency != "ILS")
+    {
+        Model.TargetCurrency = "ILS";
+    }
+}
+
+@* In Razor, we're going to need some minimal JS since Razor only runs server-side *@
+<script>
+    // Function to synchronize currencies so one is always ILS
+    function synchronizeCurrencies(changed) {
+        var sourceDropdown = document.getElementById('sourceCurrency');
+        var targetDropdown = document.getElementById('targetCurrency');
+        
+        // Get current values
+        var sourceValue = sourceDropdown.value;
+        var targetValue = targetDropdown.value;
+        
+        // If both are non-ILS or both are ILS, adjust the other dropdown
+        if (sourceValue !== 'ILS' && targetValue !== 'ILS') {
+            // If source was changed, make target ILS
+            if (changed === 'source') {
+                targetDropdown.value = 'ILS';
+            } 
+            // If target was changed, make source ILS
+            else if (changed === 'target') {
+                sourceDropdown.value = 'ILS';
+            }
+        } else if (sourceValue === 'ILS' && targetValue === 'ILS') {
+            // If source was changed to ILS and target was already ILS, set source to something else (USD)
+            if (changed === 'source') {
+                sourceDropdown.value = 'USD';
+            } 
+            // If target was changed to ILS and source was already ILS, set target to something else (USD)
+            else if (changed === 'target') {
+                targetDropdown.value = 'USD';
+            }
+        }
+    }
+    
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        // This ensures that on page load, one currency is always ILS
+        synchronizeCurrencies('source');
+    });
+</script>
