@@ -1,4 +1,5 @@
 @model CurrencyComparisonModel
+@using CurrencyComparisonTool.Models
 
 @if (Model.b_convertedAmount > 0)
 {
@@ -11,7 +12,7 @@
           </div>
           <div class="card-body">
             <h3 class="card-title mb-2">
-              <span class="shekel-symbol">₪</span>@Model.b_convertedAmount.ToString("N1")
+              <span class="currency-symbol">@CurrencyConstants.CurrencySymbols[Model.TargetCurrency]</span>@Model.b_convertedAmount.ToString("N1")
             </h3>
             <p class="card-text text-muted mb-0">Including fees and margins</p>
           </div>
@@ -25,7 +26,7 @@
           </div>
           <div class="card-body">
             <h3 class="card-title mb-2 text-success">
-              <span class="shekel-symbol">₪</span>@Model.cs_convertedAmount.ToString("N1")
+              <span class="currency-symbol">@CurrencyConstants.CurrencySymbols[Model.TargetCurrency]</span>@Model.cs_convertedAmount.ToString("N1")
             </h3>
             <p class="card-text text-muted mb-0">Transparent pricing</p>
           </div>
@@ -39,7 +40,7 @@
           </div>
           <div class="card-body">
             <h3 class="card-title mb-2 text-primary">
-              <span class="shekel-symbol">₪</span>@Model.Savings.ToString("N1")
+              <span class="currency-symbol">@CurrencyConstants.CurrencySymbols[Model.TargetCurrency]</span>@Model.Savings.ToString("N1")
             </h3>
             <p class="card-text text-muted mb-0">Total potential savings</p>
           </div>
