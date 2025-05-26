@@ -13,22 +13,25 @@ namespace CurrencyComparisonTool.Services
             if (sourceCurrency == targetCurrency)
                 return 1.0m;
 
-            if (targetCurrency == "ILS")
+            if (string.Equals(targetCurrency, "ILS", StringComparison.OrdinalIgnoreCase))
             {
                 return GetDirectRate(sourceCurrency, "ILS", date);
             }
 
-            if (sourceCurrency == "ILS")
+            if (string.Equals(sourceCurrency, "ILS", StringComparison.OrdinalIgnoreCase))
             {
                 var targetToILSRate = GetDirectRate(targetCurrency, "ILS", date);
+                if (targetToILSRate == 0) throw new DivideByZeroException("Target rate is zero");
                 return 1 / targetToILSRate;
             }
 
-            // Both currencies are non-ILS, calculate cross rate
+            // Both currencies are non-ILS – calculate cross rate
             var sourceToILS = GetDirectRate(sourceCurrency, "ILS", date);
             var targetToILS = GetDirectRate(targetCurrency, "ILS", date);
 
-            return sourceToILS / targetToILS;
+            if (targetToILS == 0) throw new DivideByZeroException("Cross conversion failed due to zero target rate");
+
+            return Decimal.Round(sourceToILS / targetToILS, 6);
         }
 
         private decimal GetDirectRate(string fromCurrency, string toCurrency, DateTime date)
@@ -37,58 +40,55 @@ namespace CurrencyComparisonTool.Services
 
             if (!rates.Any())
             {
-                throw new Exception($"No valid rate found from {fromCurrency} to {toCurrency}");
+                throw new Exception($"No valid exchange rate found for {fromCurrency} to {toCurrency}");
             }
 
+            // Return the rate closest to the requested date
             var closestRate = rates.OrderBy(rate => Math.Abs((rate.Key - date).Days)).First();
             return closestRate.Value;
         }
 
         private Dictionary<DateTime, decimal> FindValidRatesInRange(string sourceCurrency, string targetCurrency, DateTime date)
         {
-            int range = 7; // Initial range of 7 days
+            int range = 7;
             var allRates = new Dictionary<DateTime, decimal>();
 
-            using (var httpClient = new HttpClient())
+            using var httpClient = new HttpClient();
+
+            while (range <= 30)
             {
-                while (range <= 30) // Dynamically expand the range if needed, up to 30 days
+                DateTime startDate = date.AddDays(-range);
+                DateTime endDate = date.AddDays(range);
+
+                string url = $"https://edge.boi.gov.il/FusionEdgeServer/sdmx/v2/data/dataflow/BOI.STATISTICS/EXR/1.0?" +
+                             $"RER_{sourceCurrency}_{targetCurrency}&c%5BDATA_TYPE%5D=OF00" +
+                             $"&startperiod={startDate:yyyy-MM-dd}&endperiod={endDate:yyyy-MM-dd}&format=csv";
+
+                var response = httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Get, url)).Result;
+
+                if (response.IsSuccessStatusCode)
                 {
-                    DateTime startDate = date.AddDays(-range);
-                    DateTime endDate = date.AddDays(range);
+                    string csvResult = response.Content.ReadAsStringAsync().Result;
+                    var lines = csvResult.Split('\n', StringSplitOptions.RemoveEmptyEntries).Skip(1);
 
-                    // Construct a single API request for the entire range
-                    string sURL = $"https://edge.boi.gov.il/FusionEdgeServer/sdmx/v2/data/dataflow/BOI.STATISTICS/EXR/1.0?RER_{sourceCurrency}_{targetCurrency}&c%5BDATA_TYPE%5D=OF00&startperiod={startDate:yyyy-MM-dd}&endperiod={endDate:yyyy-MM-dd}&format=csv";
-                    var request = new HttpRequestMessage(HttpMethod.Get, sURL);
-                    var response = httpClient.SendAsync(request).Result;
-
-                    if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                    foreach (var line in lines)
                     {
-                        string csvResult = response.Content.ReadAsStringAsync().Result;
-
-                        // Parse all lines and collect valid rates for the given currency pair
-                        var lines = csvResult.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).Skip(1);
-                        foreach (var line in lines)
+                        var rate = ParseBOIRateLine(line);
+                        if (rate != null &&
+                            rate.BASE_CURRENCY.Equals(sourceCurrency, StringComparison.OrdinalIgnoreCase) &&
+                            rate.COUNTER_CURRENCY.Equals(targetCurrency, StringComparison.OrdinalIgnoreCase))
                         {
-                            var rate = ParseBOIRateLine(line);
-                            if (rate != null && rate.BASE_CURRENCY == sourceCurrency && rate.COUNTER_CURRENCY == targetCurrency)
-                            {
-                                allRates[rate.TIME_PERIOD] = rate.OBS_VALUE;
-                            }
-                        }
-
-                        // If we found any valid rates, return them
-                        if (allRates.Any())
-                        {
-                            return allRates;
+                            allRates[rate.TIME_PERIOD] = rate.OBS_VALUE;
                         }
                     }
 
-                    // Increase the range and try again
-                    range += 7;
+                    if (allRates.Any())
+                        return allRates;
                 }
+
+                range += 7;
             }
 
-            // Return all collected rates (could be empty if no data is found)
             return allRates;
         }
 
@@ -116,9 +116,9 @@ namespace CurrencyComparisonTool.Services
                     OBS_VALUE = decimal.TryParse(values[13], out decimal obsValue) ? obsValue : 0
                 };
             }
-            catch (Exception)
+            catch
             {
-                return null; // Return null if parsing fails
+                return null;
             }
         }
     }

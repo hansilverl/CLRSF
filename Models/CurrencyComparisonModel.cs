@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace CurrencyComparisonTool.Models
@@ -13,10 +14,13 @@ namespace CurrencyComparisonTool.Models
         public decimal BankRate { get; set; }
 
         [Range(0, double.MaxValue, ErrorMessage = "Bank Fees must be non-negative")]
-        public decimal BankFees { get; set; }
+        public decimal? BankFees { get; set; }
+
+        [Range(0, double.MaxValue, ErrorMessage = "ClearShift Fees must be non-negative")]
+        public decimal? CSFees { get; set; }
 
         [Required]
-        [Range(0, double.MaxValue, ErrorMessage = "Amount must be positive")]
+        [Range(0.0001, double.MaxValue, ErrorMessage = "Amount must be positive")]
         public decimal Amount { get; set; }
 
         [Required]
@@ -25,25 +29,36 @@ namespace CurrencyComparisonTool.Models
         [Required]
         public string TargetCurrency { get; set; } = "ILS";
 
-        private const decimal CS_fee = 0.5M; // differs between personal and business accounts, but leaving it abstract for now
-
-
         public decimal b_convertedAmount { get; set; }
         public decimal cs_convertedAmount { get; set; }
         public decimal Savings { get; set; }
 
         public static CurrencyComparisonModel Calculate(CurrencyComparisonModel model, decimal clearshiftRate)
         {
+            if (model == null) throw new ArgumentNullException(nameof(model));
 
-            // default bank fees to 1.25% if not provided
-            model.BankFees = model.BankFees == 0 ? 1.25m : model.BankFees;
+            const decimal DefaultBankFee = 1.25m;
+            const decimal DefaultCSFee = 1.0m;
 
-            // Calculate the converted amount for the bank
-            model.b_convertedAmount = (model.Amount * model.BankRate) * (1 - (model.BankFees / 100));
-            // Calculate the converted amount for ClearShift
-            model.cs_convertedAmount = (model.Amount * clearshiftRate) * (1 - (CS_fee / 100));
-            // Calculate the savings, with clearshift I should end up with more money than the bank
-            model.Savings = model.cs_convertedAmount - model.b_convertedAmount;
+            // Default fees if not supplied
+            model.BankFees ??= DefaultBankFee;
+            model.CSFees ??= DefaultCSFee;
+
+            // Ensure valid rates
+            if (model.BankRate <= 0 || clearshiftRate <= 0)
+                throw new ArgumentException("Conversion rates must be positive.");
+
+            // Bank conversion
+            model.b_convertedAmount = Decimal.Round(
+                (model.Amount * model.BankRate) * (1 - (model.BankFees.Value / 100)), 4);
+
+            // ClearShift conversion
+            model.cs_convertedAmount = Decimal.Round(
+                (model.Amount * clearshiftRate) * (1 - (model.CSFees.Value / 100)), 4);
+
+            // Savings
+            model.Savings = Decimal.Round(
+                model.cs_convertedAmount - model.b_convertedAmount, 4);
 
             return model;
         }
