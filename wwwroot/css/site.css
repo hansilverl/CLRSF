@@ -88,3 +88,30 @@ body {
   font-size: 2.5rem;
   margin-bottom: 1rem;
 }
+
+/* General drag/drop clickable area */
+.drag-drop-area {
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.drag-drop-area input[type="file"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.drag-drop-area:hover {
+  background-color: rgba(13, 110, 253, 0.05);
+}
+
+.drag-drop-area,
+.drag-drop-area:hover {
+  transition: background-color 0.2s ease-in-out;
+}
