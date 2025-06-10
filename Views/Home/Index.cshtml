@@ -1,12 +1,51 @@
 ﻿@model CurrencyComparisonModel
 
-<div class="container-fluid py-4 bg-light min-vh-100">
-  <div class="container py-3">
-    <h2 class="mb-3 fw-bold">Currency Conversion Tool</h2>
-    <p class="lead text-muted mb-4">Compare your bank's exchange rates with ClearShift to discover potential savings</p>
-    
-    <partial name="_InputMethodSelection" model="Model" />
-    
-    <partial name="_ConversionResults" model="Model" />
-  </div>
+<div class="hero-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="text-center mb-5">
+                    <h1 class="hero-title">Currency Exchange Comparison</h1>
+                    <p class="hero-subtitle">Compare bank rates with ClearShift and save money on your currency conversions</p>
+                </div>
+                <div class="converter-card">
+                    <div class="converter-header">
+                        <h3 class="converter-title">Currency Converter</h3>
+                        <p class="converter-subtitle">Get real-time exchange rates and compare costs</p>
+                    </div>
+                    <partial name="_InputMethodSelection" model="Model" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<partial name="_ConversionResults" model="Model" />
+
+<div class="features-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 text-center mb-4">
+                <div class="feature-item">
+                    <i class="bi bi-shield-check feature-icon"></i>
+                    <h5>Bank of Israel Rates</h5>
+                    <p class="text-muted">Official exchange rates from the Bank of Israel</p>
+                </div>
+            </div>
+            <div class="col-md-4 text-center mb-4">
+                <div class="feature-item">
+                    <i class="bi bi-calculator feature-icon"></i>
+                    <h5>Instant Comparison</h5>
+                    <p class="text-muted">See potential savings immediately</p>
+                </div>
+            </div>
+            <div class="col-md-4 text-center mb-4">
+                <div class="feature-item">
+                    <i class="bi bi-graph-up feature-icon"></i>
+                    <h5>Better Rates</h5>
+                    <p class="text-muted">ClearShift offers competitive exchange rates</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

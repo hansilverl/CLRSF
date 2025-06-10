@@ -1,180 +1,121 @@
 @model CurrencyComparisonModel
 @using CurrencyComparisonTool.Models
 
-@{
-  var nonIlsCurrencies = CurrencyConstants.AllowedCurrencies.Where(c => c != "ILS").ToList();
-}
-
-<div class="card mb-4">
-  <div class="nav nav-tabs justify-content-center" id="input-tabs" role="tablist">
-    <button class="nav-link d-flex align-items-center text-center px-4" id="upload-tab" data-bs-toggle="tab"
-      data-bs-target="#upload-panel" type="button" role="tab">
-      <i class="bi bi-upload me-2"></i> Upload Bank File
-    </button>
-    <button class="nav-link active d-flex align-items-center text-center px-4" id="manual-tab" data-bs-toggle="tab"
-      data-bs-target="#manual-panel" type="button" role="tab">
-      <i class="bi bi-pencil me-2"></i> Manual Input
-    </button>
-    <button class="nav-link d-flex align-items-center text-center px-4" id="custom-tab" data-bs-toggle="tab"
-      data-bs-target="#custom-panel" type="button" role="tab">
-      <i class="bi bi-file-text me-2"></i> Custom Text File
-    </button>
-  </div>
-
-  <div class="tab-content p-4" id="input-tabContent">
-    <!-- Upload CSV Tab -->
-    <div class="tab-pane fade" id="upload-panel" role="tabpanel">
-      <form id="csv-upload-form" asp-controller="Calculator" asp-action="UploadCsv" enctype="multipart/form-data"
-        method="post">
-        <div id="drop-area" class="drag-drop-area border border-2 border-dashed rounded-4 p-5 text-center position-relative transition"
-          ondragover="handleDragOver(event, 'drop-area')" ondragleave="handleDragLeave(event, 'drop-area')" ondrop="handleFileDrop(event, 'csv')">
-          <i class="bi bi-cloud-upload display-4 text-primary mb-3"></i>
-          <h5 class="fw-semibold">Drag & Drop your CSV file here</h5>
-          <p class="text-muted small">or click to browse your device</p>
-          <input type="file" id="csvFileInput" name="file" accept=".csv"
-            onchange="handleFileSelect(event, 'csv')" />
-        </div>
-        <div id="upload-error" class="text-danger text-center mt-3 d-none"></div>
-      </form>
-    </div>
-
-    <!-- Manual Entry Tab -->
-    <div class="tab-pane fade show active" id="manual-panel" role="tabpanel">
-      <form asp-action="Calculate" method="post">
-        <div class="row g-3">
-          <div class="col-md-6">
-            <label asp-for="Date" class="form-label">Transaction Date</label>
-            <input asp-for="Date" type="date" class="form-control" />
-            <span asp-validation-for="Date" class="text-danger small"></span>
-          </div>
-          <div class="col-md-6">
-            <label asp-for="BankRate" class="form-label">Bank Exchange Rate</label>
-            <input asp-for="BankRate" type="number" step="0.0001" class="form-control" />
-            <span asp-validation-for="BankRate" class="text-danger small"></span>
-          </div>
-          <div class="col-md-6">
-            <label asp-for="BankFees" class="form-label">Bank Fees (%)</label>
-            <div class="input-group">
-              <input asp-for="BankFees" type="number" step="0.01" class="form-control" />
-              <span class="input-group-text">%</span>
+<form asp-action="Calculate" method="post" class="currency-form">
+    <div class="conversion-container">
+        <!-- Amount Input -->
+        <div class="amount-section">
+            <label class="form-label">Amount</label>
+            <div class="amount-input-group">
+                <input asp-for="Amount" type="number" step="0.01" class="amount-input" placeholder="50,000" />
+                <span asp-validation-for="Amount" class="validation-error"></span>
             </div>
-            <span asp-validation-for="BankFees" class="text-danger small"></span>
-          </div>
-          <div class="col-md-6">
-            <label asp-for="Amount" class="form-label">Amount to Convert</label>
-            <input asp-for="Amount" type="number" step="0.01" class="form-control" />
-            <span asp-validation-for="Amount" class="text-danger small"></span>
-          </div>
-          <div class="col-md-6">
-            <label asp-for="SourceCurrency" class="form-label">Source Currency</label>
-            <select asp-for="SourceCurrency" class="form-select" id="sourceCurrency"
-              onchange="synchronizeCurrencies('source')">
-              @foreach (var currency in CurrencyConstants.AllowedCurrencies)
-              {
-                <option value="@currency">@currency</option>
-              }
-            </select>
-          </div>
-          <div class="col-md-6">
-            <label asp-for="TargetCurrency" class="form-label">Target Currency</label>
-            <select asp-for="TargetCurrency" class="form-select" id="targetCurrency"
-              onchange="synchronizeCurrencies('target')">
-              @foreach (var currency in CurrencyConstants.AllowedCurrencies)
-              {
-                <option value="@currency">@currency</option>
-              }
-            </select>
-          </div>
-          <div class="col-12 text-center mt-4">
-            <button type="submit" class="btn btn-primary px-4">Submit</button>
-          </div>
         </div>
-      </form>
-    </div>
 
-    <!-- Custom Text Upload Tab -->
-    <div class="tab-pane fade" id="custom-panel" role="tabpanel">
-      <form id="txt-upload-form" asp-controller="Calculator" asp-action="UploadCustomText" enctype="multipart/form-data"
-        method="post">
-        <div id="txt-drop-area"
-          class="drag-drop-area border border-2 border-dashed rounded-4 p-5 text-center position-relative transition"
-          ondragover="handleDragOver(event, 'txt-drop-area')" ondragleave="handleDragLeave(event, 'txt-drop-area')" ondrop="handleFileDrop(event, 'txt')">
-          <i class="bi bi-file-earmark-arrow-up display-4 text-primary mb-3"></i>
-          <h5 class="fw-semibold">Drag & Drop your TXT file here</h5>
-          <p class="text-muted small">or click to browse your device</p>
-          <input type="file" id="txtFileInput" name="file" accept=".txt"
-            onchange="handleFileSelect(event, 'txt')" />
+        <!-- Currency Selection -->
+        <div class="currency-section">
+            <div class="currency-pair">
+                <div class="currency-selector from-currency">
+                    <label class="currency-label">From</label>
+                    <select asp-for="SourceCurrency" class="currency-dropdown" id="sourceCurrency" onchange="handleCurrencyChange()">
+                        @foreach (var currency in CurrencyConstants.AllowedCurrencies)
+                        {
+                            <option value="@currency" selected="@(currency == Model.SourceCurrency)">
+                                @CurrencyConstants.CurrencySymbols[currency] @currency
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <div class="currency-swap">
+                    <button type="button" class="swap-button" onclick="swapCurrencies()">
+                        <i class="bi bi-arrow-left-right"></i>
+                    </button>
+                </div>
+
+                <div class="currency-selector to-currency">
+                    <label class="currency-label">To</label>
+                    <select asp-for="TargetCurrency" class="currency-dropdown" id="targetCurrency" onchange="handleCurrencyChange()">
+                        @foreach (var currency in CurrencyConstants.AllowedCurrencies)
+                        {
+                            <option value="@currency" selected="@(currency == Model.TargetCurrency)">
+                                @CurrencyConstants.CurrencySymbols[currency] @currency
+                            </option>
+                        }
+                    </select>
+                </div>
+            </div>
         </div>
-        <div id="txt-upload-error" class="text-danger text-center mt-3 d-none"></div>
-      </form>
-    </div>
-  </div>
-</div>
 
-@{
-  if (Model.SourceCurrency != "ILS" && Model.TargetCurrency != "ILS")
-  {
-    Model.TargetCurrency = "ILS";
-  }
-}
+        <!-- Bank Details -->
+        <div class="bank-details-section">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label asp-for="Date" class="form-label">Transaction Date</label>
+                    <input asp-for="Date" type="date" class="form-control modern-input" />
+                    <span asp-validation-for="Date" class="validation-error"></span>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="BankRate" class="form-label">Bank Exchange Rate</label>
+                    <input asp-for="BankRate" type="number" step="0.0001" class="form-control modern-input" placeholder="3.7500" />
+                    <span asp-validation-for="BankRate" class="validation-error"></span>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="BankFees" class="form-label">Bank Fees (%)</label>
+                    <div class="input-group">
+                        <input asp-for="BankFees" type="number" step="0.01" class="form-control modern-input" placeholder="1.25" />
+                        <span class="input-group-text">%</span>
+                    </div>
+                    <span asp-validation-for="BankFees" class="validation-error"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="submit-section">
+            <button type="submit" class="convert-button">
+                <i class="bi bi-calculator me-2"></i>
+                Compare Rates
+            </button>
+        </div>
+    </div>
+</form>
 
 <script>
-  function synchronizeCurrencies(changed) {
+function handleCurrencyChange() {
     const sourceDropdown = document.getElementById('sourceCurrency');
     const targetDropdown = document.getElementById('targetCurrency');
     const sourceValue = sourceDropdown.value;
     const targetValue = targetDropdown.value;
-
+    
+    // Ensure at least one currency is ILS
     if (sourceValue !== 'ILS' && targetValue !== 'ILS') {
-      changed === 'source' ? targetDropdown.value = 'ILS' : sourceDropdown.value = 'ILS';
-    } else if (sourceValue === 'ILS' && targetValue === 'ILS') {
-      changed === 'source' ? sourceDropdown.value = 'USD' : targetDropdown.value = 'EUR';
+        targetDropdown.value = 'ILS';
     }
-  }
-
-  function handleDragOver(e, areaId) {
-    e.preventDefault();
-    document.getElementById(areaId).classList.add('border-primary', 'bg-light');
-  }
-
-  function handleDragLeave(e, areaId) {
-    document.getElementById(areaId).classList.remove('border-primary', 'bg-light');
-  }
-
-  function handleFileDrop(e, type) {
-    e.preventDefault();
-    const areaId = type === 'csv' ? 'drop-area' : 'txt-drop-area';
-    document.getElementById(areaId).classList.remove('border-primary', 'bg-light');
-
-    const file = e.dataTransfer.files[0];
-    if (file) {
-      processFile(file, type);
+    
+    // Prevent both currencies from being the same
+    if (sourceValue === targetValue) {
+        if (sourceValue === 'ILS') {
+            targetDropdown.value = 'USD';
+        } else {
+            targetDropdown.value = 'ILS';
+        }
     }
-  }
+}
 
-  function handleFileSelect(e, type) {
-    const file = e.target.files[0];
-    if (file) {
-      processFile(file, type);
-    }
-  }
+function swapCurrencies() {
+    const sourceDropdown = document.getElementById('sourceCurrency');
+    const targetDropdown = document.getElementById('targetCurrency');
+    
+    const tempValue = sourceDropdown.value;
+    sourceDropdown.value = targetDropdown.value;
+    targetDropdown.value = tempValue;
+    
+    handleCurrencyChange();
+}
 
-  function processFile(file, type) {
-    const isCsv = type === 'csv';
-    const expectedExtension = isCsv ? '.csv' : '.txt';
-    const input = document.getElementById(isCsv ? 'csvFileInput' : 'txtFileInput');
-    const form = document.getElementById(isCsv ? 'csv-upload-form' : 'txt-upload-form');
-    const errorBox = document.getElementById(isCsv ? 'upload-error' : 'txt-upload-error');
-
-    if (file.name.endsWith(expectedExtension)) {
-      errorBox.classList.add('d-none');
-      const dataTransfer = new DataTransfer();
-      dataTransfer.items.add(file);
-      input.files = dataTransfer.files;
-      form.submit();
-    } else {
-      errorBox.textContent = `Unsupported file type. Please upload a ${expectedExtension} file.`;
-      errorBox.classList.remove('d-none');
-    }
-  }
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    handleCurrencyChange();
+});
 </script>
