@@ -53,8 +53,8 @@ namespace CurrencyComparisonTool.Models
 
             // ClearShift conversion
             model.cs_convertedAmount = Decimal.Round(
-                (model.Amount * clearshiftRate) * (1 - (model.CSFees.Value / 100)), 4);
-
+                // fee is taken Before conversion (from source amount)
+                (1 - (model.CSFees.Value / 100)) * model.Amount * clearshiftRate, 4);
             // Savings
             model.Savings = Decimal.Round(
                 model.cs_convertedAmount - model.b_convertedAmount, 4);
