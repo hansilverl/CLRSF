@@ -16,11 +16,10 @@ namespace CurrencyComparisonTool.Models
         [Range(0, double.MaxValue, ErrorMessage = "Bank Fees must be non-negative")]
         public decimal? BankFees { get; set; }
 
-        [Range(0, double.MaxValue, ErrorMessage = "ClearShift Fees must be non-negative")]
         public decimal? CSFees { get; set; }
 
         [Required]
-        [Range(0.0001, double.MaxValue, ErrorMessage = "Amount must be positive")]
+        [Range(30000.01, double.MaxValue, ErrorMessage = "Enter an amount over 30K")]
         public decimal Amount { get; set; }
 
         [Required]
@@ -38,7 +37,7 @@ namespace CurrencyComparisonTool.Models
             if (model == null) throw new ArgumentNullException(nameof(model));
 
             const decimal DefaultBankFee = 1.25m;
-            const decimal DefaultCSFee = 1.0m;
+            const decimal DefaultCSFee = 0.59m; // Default fees in percent
 
             // Default fees if not supplied
             model.BankFees ??= DefaultBankFee;
@@ -54,8 +53,8 @@ namespace CurrencyComparisonTool.Models
 
             // ClearShift conversion
             model.cs_convertedAmount = Decimal.Round(
-                (model.Amount * clearshiftRate) * (1 - (model.CSFees.Value / 100)), 4);
-
+                // fee is taken Before conversion (from source amount)
+                (1 - (model.CSFees.Value / 100)) * model.Amount * clearshiftRate, 4);
             // Savings
             model.Savings = Decimal.Round(
                 model.cs_convertedAmount - model.b_convertedAmount, 4);
