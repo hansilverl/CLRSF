@@ -1,7 +1,6 @@
-/* Hero Section with fade effect */
 .hero-section {
     background: linear-gradient(135deg, var(--clearshift-teal) 0%, var(--clearshift-blue) 100%);
-    padding: 3rem 0 2rem;
+    padding: 2rem 0 1.5rem; /* Reduced from 3rem 0 2rem */
     color: white;
     position: relative;
     overflow: hidden;
@@ -21,10 +20,10 @@
 .hero-section::after {
     content: '';
     position: absolute;
-    bottom: -3rem;
+    bottom: -2rem; 
     left: 0;
     right: 0;
-    height: 3rem;
+    height: 2rem; 
     background: linear-gradient(to bottom, var(--clearshift-blue) 0%, rgba(44, 95, 122, 0.6) 40%, rgba(248, 250, 252, 0.8) 80%, #f8fafc 100%);
     z-index: 1;
 }
@@ -37,7 +36,7 @@
 .hero-title {
     font-size: 2.75rem;
     font-weight: 700;
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem; 
     line-height: 1.2;
 }
 
