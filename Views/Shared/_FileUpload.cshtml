@@ -1,0 +1,85 @@
+@model CurrencyComparisonModel
+
+<div class="upload-section">
+    <div class="upload-area">
+        <div class="upload-icon">
+            <i class="bi bi-cloud-upload"></i>
+        </div>
+        <h4>Upload Bank Statement</h4>
+        <p class="text-muted">
+            Upload your bank statement (PDF, CSV, or Excel) and we'll automatically extract the exchange rate information.
+        </p>
+        
+        <div class="file-input-wrapper">
+            <input type="file" id="fileInput" class="file-input" accept=".pdf,.csv,.xlsx,.xls" />
+            <label for="fileInput" class="btn btn-outline-primary btn-lg">
+                <i class="bi bi-paperclip me-2"></i>
+                Choose File
+            </label>
+        </div>
+        
+        <div class="file-info" id="fileInfo" style="display: none;">
+            <div class="file-preview">
+                <i class="bi bi-file-earmark-text"></i>
+                <span class="file-name"></span>
+                <button type="button" class="btn-remove" onclick="removeFile()">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="upload-features">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="feature-item">
+                    <i class="bi bi-shield-check text-success"></i>
+                    <h6>Secure Processing</h6>
+                    <small class="text-muted">Your files are processed securely and not stored</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-item">
+                    <i class="bi bi-lightning-charge text-primary"></i>
+                    <h6>Quick Analysis</h6>
+                    <small class="text-muted">Instant extraction of rate information</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-item">
+                    <i class="bi bi-file-earmark-spreadsheet text-info"></i>
+                    <h6>Multiple Formats</h6>
+                    <small class="text-muted">Supports PDF, CSV, and Excel files</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="manual-fallback">
+        <p class="text-muted text-center">
+            <small>Can't upload a file? <a href="#" onclick="switchToManual()">Switch to manual input</a></small>
+        </p>
+    </div>
+</div>
+
+<script>
+document.getElementById('fileInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        document.querySelector('.file-name').textContent = file.name;
+        document.getElementById('fileInfo').style.display = 'block';
+        
+        // Here you would typically send the file to the server for processing
+        // For now, we'll just show the file selection
+    }
+});
+
+function removeFile() {
+    document.getElementById('fileInput').value = '';
+    document.getElementById('fileInfo').style.display = 'none';
+}
+
+function switchToManual() {
+    document.querySelector('[data-tab="manual"]').click();
+}
+</script>

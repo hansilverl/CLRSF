@@ -1,6 +1,10 @@
 ﻿@model CurrencyComparisonModel
+@{
+    ViewData["Title"] = "Currency Comparison Tool";
+}
 
-<div class="hero-section">
+<!-- Hero Section -->
+<section class="hero-section">
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-10">
@@ -8,44 +12,109 @@
                     <h1 class="hero-title">Currency Exchange Comparison</h1>
                     <p class="hero-subtitle">Compare bank rates with ClearShift and save money on your currency conversions</p>
                 </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Converter Section -->
+<section class="converter-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-8">
                 <div class="converter-card">
-                    <div class="converter-header">
-                        <h3 class="converter-title">Currency Converter</h3>
-                        <p class="converter-subtitle">Get real-time exchange rates and compare costs</p>
+                    <!-- Tab Navigation -->
+                    <div class="tab-navigation">
+                        <button class="tab-button active" data-tab="manual">
+                            <i class="bi bi-pencil-square me-2"></i>
+                            Manual Input
+                        </button>
+                        <button class="tab-button" data-tab="upload">
+                            <i class="bi bi-cloud-upload me-2"></i>
+                            Upload Statement
+                        </button>
                     </div>
-                    <partial name="_InputMethodSelection" model="Model" />
+
+                    <!-- Tab Content -->
+                    <div class="tab-content">
+                        <!-- Manual Input Tab -->
+                        <div id="manual-tab" class="tab-pane active">
+                            <partial name="_ManualInput" model="Model" />
+                        </div>
+
+                        <!-- Upload Tab -->
+                        <div id="upload-tab" class="tab-pane">
+                            <partial name="_FileUpload" model="Model" />
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+</section>
 
+<!-- Results Section -->
 <partial name="_ConversionResults" model="Model" />
 
-<div class="features-section">
+<!-- Features Section -->
+<section class="features-section">
     <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h2 class="section-title">Why Choose ClearShift?</h2>
+                <p class="section-subtitle">Experience the difference with our transparent and competitive rates</p>
+            </div>
+        </div>
         <div class="row">
-            <div class="col-md-4 text-center mb-4">
+            <div class="col-md-4">
                 <div class="feature-item">
-                    <i class="bi bi-shield-check feature-icon"></i>
-                    <h5>Bank of Israel Rates</h5>
-                    <p class="text-muted">Official exchange rates from the Bank of Israel</p>
+                    <div class="feature-icon">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <h4>Transparent Pricing</h4>
+                    <p>No hidden fees. See exactly what you pay upfront.</p>
                 </div>
             </div>
-            <div class="col-md-4 text-center mb-4">
+            <div class="col-md-4">
                 <div class="feature-item">
-                    <i class="bi bi-calculator feature-icon"></i>
-                    <h5>Instant Comparison</h5>
-                    <p class="text-muted">See potential savings immediately</p>
+                    <div class="feature-icon">
+                        <i class="bi bi-lightning-charge"></i>
+                    </div>
+                    <h4>Real-time Rates</h4>
+                    <p>Get live exchange rates from Bank of Israel data.</p>
                 </div>
             </div>
-            <div class="col-md-4 text-center mb-4">
+            <div class="col-md-4">
                 <div class="feature-item">
-                    <i class="bi bi-graph-up feature-icon"></i>
-                    <h5>Better Rates</h5>
-                    <p class="text-muted">ClearShift offers competitive exchange rates</p>
+                    <div class="feature-icon">
+                        <i class="bi bi-piggy-bank"></i>
+                    </div>
+                    <h4>Save Money</h4>
+                    <p>Compare and save on every international transfer.</p>
                 </div>
             </div>
         </div>
     </div>
-</div>
+</section>
+
+<script>
+// Tab switching functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabPanes = document.querySelectorAll('.tab-pane');
+
+    tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const targetTab = this.getAttribute('data-tab');
+            
+            // Remove active class from all buttons and panes
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            tabPanes.forEach(pane => pane.classList.remove('active'));
+            
+            // Add active class to clicked button and corresponding pane
+            this.classList.add('active');
+            document.getElementById(targetTab + '-tab').classList.add('active');
+        });
+    });
+});
+</script>
