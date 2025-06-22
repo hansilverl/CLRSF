@@ -11,7 +11,7 @@
                         <h2 class="results-title">Comparison Results</h2>
                         <p class="results-subtitle">See how much you can save with ClearShift</p>
                     </div>
-                    
+
                     <div class="comparison-grid">
                         <!-- Bank Result -->
                         <div class="result-card bank-card">
@@ -26,7 +26,8 @@
                             </div>
                             <div class="result-body">
                                 <div class="amount-display">
-                                    <span class="currency-symbol">@CurrencyConstants.CurrencySymbols[Model.TargetCurrency]</span>
+                                    <span
+                                        class="currency-symbol">@CurrencyConstants.CurrencySymbols[Model.TargetCurrency]</span>
                                     <span class="amount-value">@Model.b_convertedAmount.ToString("N2")</span>
                                 </div>
                                 <div class="rate-details">
@@ -55,7 +56,8 @@
                             </div>
                             <div class="result-body">
                                 <div class="amount-display">
-                                    <span class="currency-symbol">@CurrencyConstants.CurrencySymbols[Model.TargetCurrency]</span>
+                                    <span
+                                        class="currency-symbol">@CurrencyConstants.CurrencySymbols[Model.TargetCurrency]</span>
                                     <span class="amount-value">@Model.cs_convertedAmount.ToString("N2")</span>
                                 </div>
                                 <div class="rate-details">
@@ -76,7 +78,8 @@
                             <div class="savings-content">
                                 <h4 class="savings-title">Your Potential Savings</h4>
                                 <div class="savings-amount">
-                                    <span class="currency-symbol">@CurrencyConstants.CurrencySymbols[Model.TargetCurrency]</span>
+                                    <span
+                                        class="currency-symbol">@CurrencyConstants.CurrencySymbols[Model.TargetCurrency]</span>
                                     <span class="amount-value">@Math.Abs(Model.Savings).ToString("N2")</span>
                                 </div>
                                 @if (Model.Savings > 0)
@@ -125,15 +128,15 @@
     </div>
 
     <script>
-    function startNewComparison() {
-        // Reset form values
-        document.querySelector('input[name="Amount"]').value = '';
-        document.querySelector('input[name="BankRate"]').value = '';
-        document.querySelector('input[name="BankFees"]').value = '';
-        // Scroll to top
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        // Focus on amount input
-        document.querySelector('input[name="Amount"]').focus();
-    }
+        function startNewComparison() {
+            // Reset form values
+            document.querySelector('input[name="Amount"]').value = '';
+            document.querySelector('input[name="BankRate"]').value = '';
+            document.querySelector('input[name="BankFees"]').value = '';
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            // Focus on amount input
+            document.querySelector('input[name="Amount"]').focus();
+        }
     </script>
 }

@@ -90,33 +90,113 @@
 </form>
 
 <script>
-// Format number with commas
-function formatNumber(num) {
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+// Format number with commas for display
+function formatNumberWithCommas(num) {
+    // Remove any existing commas and non-numeric characters except decimal point
+    let cleanNum = num.toString().replace(/[^\d.]/g, '');
+    
+    // Split into integer and decimal parts
+    let parts = cleanNum.split('.');
+    
+    // Add commas to integer part
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    
+    // Return formatted number
+    return parts.join('.');
 }
 
-// Parse number removing commas
-function parseNumber(str) {
-    return str.replace(/,/g, "");
+// Parse number by removing commas for backend processing
+function parseNumberRemoveCommas(str) {
+    return str.replace(/,/g, '');
 }
 
-// Handle amount input formatting
+// Handle amount input formatting and validation
 document.addEventListener('DOMContentLoaded', function() {
     const amountInput = document.getElementById('amountInput');
     
-    // Format on input
+    // Format existing value on page load
+    if (amountInput.value && amountInput.value !== '0') {
+        amountInput.value = formatNumberWithCommas(amountInput.value);
+    }
+    
+    // Handle input event for real-time formatting
     amountInput.addEventListener('input', function(e) {
-        let value = e.target.value.replace(/[^\d.]/g, '');
-        if (value) {
-            let parts = value.split('.');
-            parts[0] = formatNumber(parts[0]);
-            e.target.value = parts.join('.');
+        let cursorPosition = e.target.selectionStart;
+        let oldValue = e.target.value;
+        let oldLength = oldValue.length;
+        
+        // Allow only numbers, decimal point, and commas
+        let value = e.target.value.replace(/[^\d.,]/g, '');
+        
+        // Remove commas for processing
+        let numericValue = value.replace(/,/g, '');
+        
+        // Validate decimal places (max 2)
+        if (numericValue.includes('.')) {
+            let parts = numericValue.split('.');
+            if (parts[1] && parts[1].length > 2) {
+                numericValue = parts[0] + '.' + parts[1].substring(0, 2);
+            }
+        }
+        
+        // Format with commas if there's a value
+        if (numericValue && numericValue !== '.') {
+            let formatted = formatNumberWithCommas(numericValue);
+            e.target.value = formatted;
+            
+            // Adjust cursor position after formatting
+            let newLength = formatted.length;
+            let lengthDiff = newLength - oldLength;
+            let newCursorPosition = cursorPosition + lengthDiff;
+            
+            // Ensure cursor position is valid
+            if (newCursorPosition < 0) newCursorPosition = 0;
+            if (newCursorPosition > newLength) newCursorPosition = newLength;
+            
+            // Set cursor position
+            setTimeout(() => {
+                e.target.setSelectionRange(newCursorPosition, newCursorPosition);
+            }, 0);
+        } else {
+            e.target.value = numericValue;
         }
     });
     
-    // Parse before form submission
+    // Handle paste event
+    amountInput.addEventListener('paste', function(e) {
+        setTimeout(() => {
+            let value = e.target.value.replace(/[^\d.,]/g, '');
+            let numericValue = value.replace(/,/g, '');
+            
+            if (numericValue && numericValue !== '.') {
+                e.target.value = formatNumberWithCommas(numericValue);
+            }
+        }, 0);
+    });
+    
+    // Parse before form submission to remove commas for backend
     document.querySelector('.modern-form').addEventListener('submit', function(e) {
-        amountInput.value = parseNumber(amountInput.value);
+        let currentValue = amountInput.value;
+        amountInput.value = parseNumberRemoveCommas(currentValue);
+        
+        // Validate minimum amount
+        let numericAmount = parseFloat(amountInput.value);
+        if (numericAmount <= 30000) {
+            e.preventDefault();
+            amountInput.value = currentValue; // Restore formatted value
+            amountInput.focus();
+            return false;
+        }
+    });
+    
+    // Restore formatted value if form submission fails
+    window.addEventListener('pageshow', function() {
+        if (amountInput.value && !amountInput.value.includes(',')) {
+            let numValue = parseFloat(amountInput.value);
+            if (numValue > 0) {
+                amountInput.value = formatNumberWithCommas(amountInput.value);
+            }
+        }
     });
 });
 
