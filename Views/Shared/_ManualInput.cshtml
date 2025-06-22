@@ -12,38 +12,28 @@
             </div>
         </div>
 
-        <div class="currency-section">
-            <div class="currency-pair">
-                <div class="currency-selector">
-                    <label class="form-label">From</label>
-                    <select asp-for="SourceCurrency" class="currency-dropdown" id="sourceCurrency" onchange="handleCurrencyChange()">
-                        @foreach (var currency in CurrencyConstants.AllowedCurrencies)
-                        {
-                            <option value="@currency" selected="@(currency == Model.SourceCurrency)">
-                                @CurrencyConstants.CurrencySymbols[currency] @currency
-                            </option>
-                        }
-                    </select>
-                </div>
+        <div class="currency-selector">
+            <label class="form-label">From</label>
+            <select asp-for="SourceCurrency" class="currency-dropdown" id="sourceCurrency" onchange="handleCurrencyChange()">
+                @foreach (var currency in CurrencyConstants.AllowedCurrencies)
+                {
+                    <option value="@currency" selected="@(currency == Model.SourceCurrency)">
+                        @CurrencyConstants.CurrencySymbols[currency] @currency
+                    </option>
+                }
+            </select>
+        </div>
 
-                <div class="currency-swap">
-                    <button type="button" class="swap-button" onclick="swapCurrencies()" title="Swap currencies">
-                        <i class="bi bi-arrow-left-right"></i>
-                    </button>
-                </div>
-
-                <div class="currency-selector">
-                    <label class="form-label">To</label>
-                    <select asp-for="TargetCurrency" class="currency-dropdown" id="targetCurrency" onchange="handleCurrencyChange()">
-                        @foreach (var currency in CurrencyConstants.AllowedCurrencies)
-                        {
-                            <option value="@currency" selected="@(currency == Model.TargetCurrency)">
-                                @CurrencyConstants.CurrencySymbols[currency] @currency
-                            </option>
-                        }
-                    </select>
-                </div>
-            </div>
+        <div class="currency-selector">
+            <label class="form-label">To</label>
+            <select asp-for="TargetCurrency" class="currency-dropdown" id="targetCurrency" onchange="handleCurrencyChange()">
+                @foreach (var currency in CurrencyConstants.AllowedCurrencies)
+                {
+                    <option value="@currency" selected="@(currency == Model.TargetCurrency)">
+                        @CurrencyConstants.CurrencySymbols[currency] @currency
+                    </option>
+                }
+            </select>
         </div>
     </div>
 

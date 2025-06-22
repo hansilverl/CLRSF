@@ -88,8 +88,8 @@
 
 .primary-row {
     display: grid;
-    grid-template-columns: 1fr 2fr;
-    gap: 2rem;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
     align-items: end;
     margin-bottom: 2rem;
     padding-bottom: 1.5rem;
@@ -113,15 +113,13 @@
 
 .amount-input {
     width: 100%;
-    padding: 1rem;
-    font-size: 1.5rem;
-    font-weight: 700;
-    text-align: center;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    font-weight: bold;
     border: 2px solid #e5e7eb;
     border-radius: var(--border-radius);
-    background: #f9fafb;
     transition: var(--transition);
-    color: var(--clearshift-teal);
+    background: white;
 }
 
 .amount-input:focus {
@@ -134,6 +132,7 @@
 /* Currency Section */
 .currency-section {
     position: relative;
+    grid-column: span 2;
 }
 
 .currency-pair {
