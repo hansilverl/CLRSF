@@ -399,23 +399,38 @@
 }
 
 .btn-remove {
-    background: var(--danger-color);
-    color: white;
-    border: none;
+    background: transparent;
+    color: var(--clearshift-gray);
+    border: 1px transparent;
     border-radius: 50%;
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    font-size: 0.75rem;
+    font-size: 1.25rem; /* Increased font size */
     transition: var(--transition);
+    font-weight: 700; /* Bolder */
+    line-height: 1;
+    padding: 0;
+}
+
+.btn-remove i {
+    font-size: 2rem; 
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900; 
+    color: var(--clearshift-blue); /* Use site accent color */
+    text-shadow: 0 1px 2px rgba(52, 144, 220, 0.12); /* Subtle shadow for contrast */
 }
 
 .btn-remove:hover {
-    background: #dc2626;
-    transform: scale(1.1);
+    background: rgba(52, 144, 220, 0.08); /* Light blue background on hover */
+    color: var(--clearshift-teal);
+    border-color: var(--clearshift-teal);
 }
 
 .upload-features {

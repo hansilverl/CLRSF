@@ -79,6 +79,14 @@ document.getElementById('fileInput').addEventListener('change', function(e) {
     }
 });
 
+// Make entire upload area clickable
+document.getElementById('uploadArea').addEventListener('click', function(e) {
+    // Don't trigger if clicking on the actual button or remove button
+    if (!e.target.closest('.btn') && !e.target.closest('.btn-remove')) {
+        document.getElementById('fileInput').click();
+    }
+});
+
 // Drag and drop handlers
 function handleDragOver(e) {
     e.preventDefault();
