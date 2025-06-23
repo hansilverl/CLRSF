@@ -1,41 +1,50 @@
 @model CurrencyComparisonModel
 
 <div class="upload-section">
-    <div class="upload-area" id="uploadArea" 
-         ondragover="handleDragOver(event)" 
-         ondragleave="handleDragLeave(event)" 
-         ondrop="handleFileDrop(event)">
-        <div class="upload-icon">
-            <i class="bi bi-cloud-upload"></i>
-        </div>
-        <h4>Upload Bank Statement</h4>
-        <p class="text-muted">
-            Drag & drop your bank statement here or click to browse
-        </p>
-        <p class="text-muted small">
-            Supported formats: PDF, CSV, and TXT files
-        </p>
+    <form asp-action="UploadFile" method="post" enctype="multipart/form-data" id="uploadForm">
+        @Html.AntiForgeryToken()
         
-        <div class="file-input-wrapper">
-            <input type="file" id="fileInput" class="file-input" accept=".pdf,.csv,.txt" />
-            <label for="fileInput" class="btn btn-outline-primary btn-lg">
-                <i class="bi bi-paperclip me-2"></i>
-                Choose File
-            </label>
-        </div>
-        
-        <div class="file-info" id="fileInfo" style="display: none;">
-            <div class="file-preview">
-                <i class="bi bi-file-earmark-text"></i>
-                <span class="file-name"></span>
-                <button type="button" class="btn-remove" onclick="removeFile()">
-                    <i class="bi bi-x"></i>
-                </button>
+        <div class="upload-area" id="uploadArea" 
+             ondragover="handleDragOver(event)" 
+             ondragleave="handleDragLeave(event)" 
+             ondrop="handleFileDrop(event)">
+            <div class="upload-icon">
+                <i class="bi bi-cloud-upload"></i>
             </div>
+            <h4>Upload Bank Statement</h4>
+            <p class="text-muted">
+                Drag & drop your bank statement here or click to browse
+            </p>
+            <p class="text-muted small">
+                Supported formats: PDF, CSV, and TXT files
+            </p>
+            
+            <div class="file-input-wrapper">
+                <input type="file" id="fileInput" name="file" class="file-input" accept=".pdf,.csv,.txt" />
+                <label for="fileInput" class="btn btn-outline-primary btn-lg">
+                    <i class="bi bi-paperclip me-2"></i>
+                    Choose File
+                </label>
+            </div>
+            
+            <div class="file-info" id="fileInfo" style="display: none;">
+                <div class="file-preview">
+                    <i class="bi bi-file-earmark-text"></i>
+                    <span class="file-name"></span>
+                    <button type="button" class="btn-remove" onclick="removeFile()">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div id="uploadError" class="text-danger text-center mt-3" style="display: none;"></div>
+            
+            <button type="submit" id="uploadBtn" class="btn btn-primary mt-3" style="display: none;">
+                <i class="bi bi-upload me-2"></i>
+                Process File
+            </button>
         </div>
-        
-        <div id="uploadError" class="text-danger text-center mt-3" style="display: none;"></div>
-    </div>
+    </form>
     
     <div class="upload-features">
         <div class="row">
@@ -70,21 +79,26 @@
     </div>
 </div>
 
-<script>
-// File input change handler
-document.getElementById('fileInput').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
-        processSelectedFile(file);
-    }
-});
+<script nonce="@ViewData["ScriptNonce"]">
+document.addEventListener('DOMContentLoaded', function() {
+    // File input change handler
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            processSelectedFile(file);
+        }
+    });
 
-// Make entire upload area clickable
-document.getElementById('uploadArea').addEventListener('click', function(e) {
-    // Don't trigger if clicking on the actual button or remove button
-    if (!e.target.closest('.btn') && !e.target.closest('.btn-remove')) {
-        document.getElementById('fileInput').click();
-    }
+    // Make entire upload area clickable
+    document.getElementById('uploadArea').addEventListener('click', function(e) {
+        // Don't trigger if clicking on buttons or form elements
+        if (!e.target.closest('.btn') && 
+            !e.target.closest('.btn-remove') && 
+            !e.target.closest('button') &&
+            !e.target.closest('input')) {
+            document.getElementById('fileInput').click();
+        }
+    });
 });
 
 // Drag and drop handlers
@@ -155,20 +169,45 @@ function processSelectedFile(file) {
         return;
     }
     
+    // Sanitize file name for display (security measure)
+    const sanitizedFileName = sanitizeFileName(file.name);
+    
     // Hide error and show file info
     errorDiv.style.display = 'none';
-    document.querySelector('.file-name').textContent = file.name;
+    document.querySelector('.file-name').textContent = sanitizedFileName;
     document.getElementById('fileInfo').style.display = 'block';
+    document.getElementById('uploadBtn').style.display = 'inline-block';
     
-    // Here you would typically send the file to the server for processing
-    // For now, we'll just show the file selection
-    console.log('File selected:', file.name, 'Size:', file.size, 'Type:', file.type);
+    console.log('File selected:', sanitizedFileName, 'Size:', file.size, 'Type:', file.type);
+}
+
+function sanitizeFileName(fileName) {
+    // Remove potentially dangerous characters and limit length
+    let sanitized = fileName
+        .replace(/[<>:"/\\|?*\x00-\x1f]/g, '') // Remove dangerous characters
+        .replace(/\.\./g, '') // Remove directory traversal attempts
+        .trim();
+    
+    // Limit length to prevent issues
+    if (sanitized.length > 255) {
+        const extension = sanitized.substring(sanitized.lastIndexOf('.'));
+        const name = sanitized.substring(0, 255 - extension.length);
+        sanitized = name + extension;
+    }
+    
+    // Ensure it's not empty after sanitization
+    if (!sanitized || sanitized === '') {
+        sanitized = 'unnamed_file';
+    }
+    
+    return sanitized;
 }
 
 function removeFile() {
     document.getElementById('fileInput').value = '';
     document.getElementById('fileInfo').style.display = 'none';
     document.getElementById('uploadError').style.display = 'none';
+    document.getElementById('uploadBtn').style.display = 'none';
 }
 
 function switchToManual() {
@@ -179,7 +218,7 @@ function switchToManual() {
     } else {
         // Alternative method if tab structure is different
         const tabButtons = document.querySelectorAll('.tab-button');
-        tabButtons.forEach(button => {
+        tabButtons.forEach(function(button) {
             if (button.textContent.includes('Manual') || button.textContent.includes('manual')) {
                 button.click();
             }
