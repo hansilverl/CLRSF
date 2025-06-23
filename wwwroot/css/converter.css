@@ -90,7 +90,7 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 1.5rem;
-    align-items: end;
+    align-items: start; /* Changed from 'end' to 'start' */
     margin-bottom: 2rem;
     padding-bottom: 1.5rem;
     border-bottom: 2px solid var(--clearshift-light-teal);
@@ -100,6 +100,25 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 1.5rem;
+    align-items: start; /* Changed from 'end' to 'start' */
+}
+
+/* Add consistent spacing for all form sections */
+.amount-section,
+.currency-selector,
+.form-group {
+    display: flex;
+    flex-direction: column;
+    min-height: 80px; /* Ensure consistent minimum height */
+}
+
+/* Ensure validation errors have consistent positioning */
+.validation-error {
+    color: var(--danger-color);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: block;
+    min-height: 1.2em; /* Reserve space for error messages */
 }
 
 /* Amount Section */
