@@ -23,7 +23,8 @@ namespace CurrencyComparisonTool.Controllers
         public IActionResult Calculate(CurrencyComparisonModel model)
         {
             if (ModelState.IsValid)
-            {   Console.WriteLine($"ModelState is valid: {model.Date} {model.SourceCurrency} {model.TargetCurrency} {model.Amount} {model.BankRate} {model.BankFees}");
+            {
+                Console.WriteLine($"ModelState is valid: {model.Date} {model.SourceCurrency} {model.TargetCurrency} {model.Amount} {model.BankRate} {model.BankFees}");
                 var clearShiftRate = _exchangeRateService.GetBOIRate(model.SourceCurrency, model.TargetCurrency, model.Date);
                 Console.WriteLine($"ClearShift Rate: {clearShiftRate}");
                 model = CurrencyComparisonModel.Calculate(model, clearShiftRate);
@@ -35,6 +36,15 @@ namespace CurrencyComparisonTool.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        public IActionResult IndexWithNonce()
+        {
+            // Generate nonce for CSP
+            ViewData["ScriptNonce"] = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
+
+            var model = new CurrencyComparisonModel();
+            return View("Index", model);
         }
     }
 }

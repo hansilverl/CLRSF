@@ -3,58 +3,140 @@
 
 @if (Model.b_convertedAmount > 0)
 {
-  <div class="container p4-5">
-    <div class="row g-4">
-      <div class="col-md-4">
-        <div class="card results-card h-100">
-          <div class="card-header bg-white">
-            <h5 class="m-0 text-secondary">Bank Conversion</h5>
-          </div>
-          <div class="card-body">
-            <h3 class="card-title mb-2">
-              <span class="currency-symbol">@CurrencyConstants.CurrencySymbols[Model.TargetCurrency]</span>@Model.b_convertedAmount.ToString("N1")
-            </h3>
-            <p class="card-text text-muted mb-0">Including fees and margins</p>
-          </div>
+    <div class="results-section">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="results-header text-center mb-5">
+                        <h2 class="results-title">Comparison Results</h2>
+                        <p class="results-subtitle">See how much you can save with ClearShift</p>
+                    </div>
+
+                    <div class="comparison-grid">
+                        <!-- Bank Result -->
+                        <div class="result-card bank-card">
+                            <div class="result-header">
+                                <div class="provider-info">
+                                    <i class="bi bi-building provider-icon bank-icon"></i>
+                                    <span class="provider-name">Your Bank</span>
+                                </div>
+                                <div class="rate-badge bank-badge">
+                                    Traditional Rate
+                                </div>
+                            </div>
+                            <div class="result-body">
+                                <div class="amount-display">
+                                    <span
+                                        class="currency-symbol">@CurrencyConstants.CurrencySymbols[Model.TargetCurrency]</span>
+                                    <span class="amount-value">@Model.b_convertedAmount.ToString("N2")</span>
+                                </div>
+                                <div class="rate-details">
+                                    <small class="text-muted">
+                                        Rate: @Model.BankRate | Fees: @(Model.BankFees?.ToString("0.##") ?? "1.25")%
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- VS Indicator -->
+                        <div class="vs-indicator">
+                            <span class="vs-text">VS</span>
+                        </div>
+
+                        <!-- ClearShift Result -->
+                        <div class="result-card clearshift-card">
+                            <div class="result-header">
+                                <div class="provider-info">
+                                    <i class="bi bi-lightning provider-icon clearshift-icon"></i>
+                                    <span class="provider-name">ClearShift</span>
+                                </div>
+                                <div class="rate-badge clearshift-badge">
+                                    Better Rate
+                                </div>
+                            </div>
+                            <div class="result-body">
+                                <div class="amount-display">
+                                    <span
+                                        class="currency-symbol">@CurrencyConstants.CurrencySymbols[Model.TargetCurrency]</span>
+                                    <span class="amount-value">@Model.cs_convertedAmount.ToString("N2")</span>
+                                </div>
+                                <div class="rate-details">
+                                    <small class="text-muted">
+                                        Bank of Israel rate | Fees: @(Model.CSFees?.ToString("0.##") ?? "1.00")%
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Savings Highlight -->
+                    <div class="savings-highlight">
+                        <div class="savings-card">
+                            <div class="savings-icon">
+                                <i class="bi bi-piggy-bank"></i>
+                            </div>
+                            <div class="savings-content">
+                                <h4 class="savings-title">Your Potential Savings</h4>
+                                <div class="savings-amount">
+                                    <span
+                                        class="currency-symbol">@CurrencyConstants.CurrencySymbols[Model.TargetCurrency]</span>
+                                    <span class="amount-value">@Math.Abs(Model.Savings).ToString("N2")</span>
+                                </div>
+                                @if (Model.Savings > 0)
+                                {
+                                    <p class="savings-text success">
+                                        <i class="bi bi-arrow-up-circle-fill me-1"></i>
+                                        You save more with ClearShift!
+                                    </p>
+                                }
+                                else if (Model.Savings < 0)
+                                {
+                                    <p class="savings-text warning">
+                                        <i class="bi bi-info-circle-fill me-1"></i>
+                                        Your bank offers a better rate for this transaction
+                                    </p>
+                                }
+                                else
+                                {
+                                    <p class="savings-text neutral">
+                                        <i class="bi bi-dash-circle-fill me-1"></i>
+                                        Both options offer similar value
+                                    </p>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="action-buttons">
+                        <button type="button" class="btn btn-outline-primary btn-lg" onclick="window.print()">
+                            <i class="bi bi-printer me-2"></i>
+                            Print Results
+                        </button>
+                        <button type="button" class="btn btn-success btn-lg">
+                            <i class="bi bi-download me-2"></i>
+                            Export Results
+                        </button>
+                        <button type="button" class="btn btn-primary btn-lg">
+                            <i class="bi bi-file-earmark-pdf me-2"></i>
+                            Download Report
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-      
-      <div class="col-md-4">
-        <div class="card results-card h-100">
-          <div class="card-header bg-white">
-            <h5 class="m-0 text-secondary">ClearShift Conversion</h5>
-          </div>
-          <div class="card-body">
-            <h3 class="card-title mb-2 text-success">
-              <span class="currency-symbol">@CurrencyConstants.CurrencySymbols[Model.TargetCurrency]</span>@Model.cs_convertedAmount.ToString("N1")
-            </h3>
-            <p class="card-text text-muted mb-0">Transparent pricing</p>
-          </div>
-        </div>
-      </div>
-      
-      <div class="col-md-4">
-        <div class="card results-card h-100">
-          <div class="card-header bg-white">
-            <h5 class="m-0 text-secondary">Your Savings</h5>
-          </div>
-          <div class="card-body">
-            <h3 class="card-title mb-2 text-primary">
-              <span class="currency-symbol">@CurrencyConstants.CurrencySymbols[Model.TargetCurrency]</span>@Model.Savings.ToString("N1")
-            </h3>
-            <p class="card-text text-muted mb-0">Total potential savings</p>
-          </div>
-        </div>
-      </div>
     </div>
-    
-    <div class="d-flex justify-content-end gap-3 mt-4">
-      <button class="btn btn-success">
-        <i class="bi bi-download me-2"></i>Export Results
-      </button>
-      <button class="btn btn-primary">
-        <i class="bi bi-file-earmark-pdf me-2"></i>Download Report
-      </button>
-    </div>
-  </div>
+
+    <script>
+        function startNewComparison() {
+            // Reset form values
+            document.querySelector('input[name="Amount"]').value = '';
+            document.querySelector('input[name="BankRate"]').value = '';
+            document.querySelector('input[name="BankFees"]').value = '';
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            // Focus on amount input
+            document.querySelector('input[name="Amount"]').focus();
+        }
+    </script>
 }
