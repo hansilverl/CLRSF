@@ -5,8 +5,10 @@
     <!-- Amount and Currency Row -->
     <div class="form-row primary-row">
         <div class="amount-section">
+            <label asp-for="Amount" class="form-label">
+                Amount
+            </label>
             <div class="amount-wrapper">
-                <label class="form-label">Amount</label>
                 <input asp-for="Amount" type="text" class="amount-input" placeholder="50,000" id="amountInput" />
             </div>
             <span asp-validation-for="Amount" class="validation-error"></span>
@@ -15,8 +17,10 @@
         <div class="currency-pair-container">
             <div class="currency-pair">
                 <div class="currency-selector">
+                    <label asp-for="SourceCurrency" class="form-label">
+                        From
+                    </label>
                     <div class="currency-wrapper">
-                        <label class="form-label">From</label>
                         <select asp-for="SourceCurrency" class="currency-dropdown" id="sourceCurrency"
                             onchange="handleCurrencyChange()">
                             @foreach (var currency in CurrencyConstants.AllowedCurrencies)
@@ -38,8 +42,10 @@
                 </div>
 
                 <div class="currency-selector">
+                    <label asp-for="TargetCurrency" class="form-label">
+                        To
+                    </label>
                     <div class="currency-wrapper">
-                        <label class="form-label">To</label>
                         <select asp-for="TargetCurrency" class="currency-dropdown" id="targetCurrency"
                             onchange="handleCurrencyChange()">
                             @foreach (var currency in CurrencyConstants.AllowedCurrencies)
