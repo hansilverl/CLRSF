@@ -25,9 +25,17 @@
         gap: 1.5rem;
     }
 
+    .bank-card {
+        order: 1;
+    }
+
     .vs-indicator {
         order: 2;
         margin: 1rem auto;
+    }
+
+    .clearshift-card {
+        order: 3;
     }
 }
 
@@ -59,7 +67,7 @@
 
     .primary-row {
         grid-template-columns: 1fr;
-        gap: 1.5rem;
+        gap: 1rem;
         padding-bottom: 1rem;
     }
 
@@ -73,9 +81,27 @@
     }
 
     .currency-pair {
-        grid-template-columns: 1fr auto 1fr;
-        gap: 0.75rem;
+        grid-template-columns: 1fr;
+        gap: 1rem;
         align-items: center;
+    }
+    
+    .swap-button-container {
+        order: 2;
+        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .currency-selector:first-child {
+        order: 1;
+    }
+    
+    .currency-selector:last-child {
+        order: 3;
+    }
+    
+    .swap-icon {
+        transform: rotate(90deg);
     }
 
     .comparison-grid {
@@ -84,12 +110,20 @@
         padding: 0 1rem;
     }
 
+    .bank-card {
+        order: 1;
+    }
+
     .vs-indicator {
         order: 2;
         margin: 1rem auto;
         width: 40px;
         height: 40px;
         font-size: 0.9rem;
+    }
+
+    .clearshift-card {
+        order: 3;
     }
 
     .tab-button {

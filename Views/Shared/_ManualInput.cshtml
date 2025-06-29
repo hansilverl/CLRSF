@@ -5,35 +5,53 @@
     <!-- Amount and Currency Row -->
     <div class="form-row primary-row">
         <div class="amount-section">
-            <label class="form-label">Amount</label>
-            <input asp-for="Amount" type="text" class="amount-input" placeholder="50,000" id="amountInput" />
+            <div class="amount-wrapper">
+                <label class="form-label">Amount</label>
+                <input asp-for="Amount" type="text" class="amount-input" placeholder="50,000" id="amountInput" />
+            </div>
             <span asp-validation-for="Amount" class="validation-error"></span>
         </div>
 
-        <div class="currency-selector">
-            <label class="form-label">From</label>
-            <select asp-for="SourceCurrency" class="currency-dropdown" id="sourceCurrency"
-                onchange="handleCurrencyChange()">
-                @foreach (var currency in CurrencyConstants.AllowedCurrencies)
-                {
-                    <option value="@currency" selected="@(currency == Model.SourceCurrency)">
-                        @CurrencyConstants.CurrencySymbols[currency] @currency
-                    </option>
-                }
-            </select>
-        </div>
+        <div class="currency-pair-container">
+            <div class="currency-pair">
+                <div class="currency-selector">
+                    <div class="currency-wrapper">
+                        <label class="form-label">From</label>
+                        <select asp-for="SourceCurrency" class="currency-dropdown" id="sourceCurrency"
+                            onchange="handleCurrencyChange()">
+                            @foreach (var currency in CurrencyConstants.AllowedCurrencies)
+                            {
+                                <option value="@currency" selected="@(currency == Model.SourceCurrency)">
+                                    @CurrencyConstants.CurrencySymbols[currency] @currency
+                                </option>
+                            }
+                        </select>
+                    </div>
+                </div>
 
-        <div class="currency-selector">
-            <label class="form-label">To</label>
-            <select asp-for="TargetCurrency" class="currency-dropdown" id="targetCurrency"
-                onchange="handleCurrencyChange()">
-                @foreach (var currency in CurrencyConstants.AllowedCurrencies)
-                {
-                    <option value="@currency" selected="@(currency == Model.TargetCurrency)">
-                        @CurrencyConstants.CurrencySymbols[currency] @currency
-                    </option>
-                }
-            </select>
+                <div class="swap-button-container">
+                    <button type="button" class="swap-currencies-btn" onclick="swapCurrencies()" aria-label="Swap currencies">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 17" aria-hidden="true" class="swap-icon">
+                            <path fill="currentColor" fill-rule="evenodd" d="M11.726 1.273l2.387 2.394H.667V5h13.446l-2.386 2.393.94.94 4-4-4-4-.94.94zM.666 12.333l4 4 .94-.94L3.22 13h13.447v-1.333H3.22l2.386-2.394-.94-.94-4 4z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="currency-selector">
+                    <div class="currency-wrapper">
+                        <label class="form-label">To</label>
+                        <select asp-for="TargetCurrency" class="currency-dropdown" id="targetCurrency"
+                            onchange="handleCurrencyChange()">
+                            @foreach (var currency in CurrencyConstants.AllowedCurrencies)
+                            {
+                                <option value="@currency" selected="@(currency == Model.TargetCurrency)">
+                                    @CurrencyConstants.CurrencySymbols[currency] @currency
+                                </option>
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
