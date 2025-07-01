@@ -1,4 +1,5 @@
 ﻿@model CurrencyComparisonModel
+@using CurrencyComparisonTool.Models
 @{
     ViewData["Title"] = "Currency Comparison Tool";
 }
@@ -37,6 +38,20 @@
 
                     <!-- Tab Content -->
                     <div class="tab-content">
+                        <!-- Error Toast -->
+                        @if (ViewData["ErrorMessage"] != null)
+                        {
+                            <div class="error-toast" id="errorToast">
+                                <div class="error-toast-content">
+                                    <i class="bi bi-exclamation-triangle-fill error-icon"></i>
+                                    <span class="error-message">@ViewData["ErrorMessage"]</span>
+                                    <button type="button" class="toast-close" onclick="closeErrorToast()">
+                                        <i class="bi bi-x"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        }
+
                         <!-- Manual Input Tab -->
                         <div id="manual-tab" class="tab-pane active">
                             <partial name="_ManualInput" model="Model" />
@@ -117,4 +132,15 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+// Error toast functionality
+function closeErrorToast() {
+    const toast = document.getElementById('errorToast');
+    if (toast) {
+        toast.style.opacity = '0';
+        setTimeout(() => {
+            toast.style.display = 'none';
+        }, 300);
+    }
+}
 </script>
