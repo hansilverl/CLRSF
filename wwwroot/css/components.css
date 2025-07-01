@@ -1,0 +1,506 @@
+/* =================================
+   COMPONENTS.CSS
+   Reusable UI Components
+   ================================= */
+
+/* =================================
+   BUTTONS
+   ================================= */
+
+/* Button Styles - Complete override of Bootstrap defaults */
+.btn-primary {
+    background-color: var(--clearshift-teal);
+    border-color: var(--clearshift-teal);
+}
+
+.btn-primary:hover {
+    background-color: var(--clearshift-teal-dark);
+    border-color: var(--clearshift-teal-dark);
+}
+
+.btn-primary:active,
+.btn-primary:focus,
+.btn-primary.active,
+.btn-primary.show {
+    background-color: var(--clearshift-orange) !important;
+    border-color: var(--clearshift-orange) !important;
+    box-shadow: 0 0 0 3px rgba(247, 148, 29, 0.25) !important;
+}
+
+.btn-primary:focus-visible {
+    background-color: var(--clearshift-orange) !important;
+    border-color: var(--clearshift-orange) !important;
+    box-shadow: 0 0 0 3px rgba(247, 148, 29, 0.25) !important;
+    outline: none !important;
+}
+
+.btn-outline-primary {
+    color: var(--clearshift-teal);
+    border-color: var(--clearshift-teal);
+    background-color: transparent;
+    --bs-btn-color: var(--clearshift-teal);
+    --bs-btn-border-color: var(--clearshift-teal);
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: var(--clearshift-teal);
+    --bs-btn-hover-border-color: var(--clearshift-teal);
+    --bs-btn-focus-shadow-rgb: 74, 157, 168;
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: var(--clearshift-orange);
+    --bs-btn-active-border-color: var(--clearshift-orange);
+    --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+    --bs-btn-disabled-color: var(--clearshift-teal);
+    --bs-btn-disabled-bg: transparent;
+    --bs-btn-disabled-border-color: var(--clearshift-teal);
+    --bs-gradient: none;
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--clearshift-teal);
+    border-color: var(--clearshift-teal);
+    color: white;
+}
+
+.btn-outline-primary:focus {
+    background-color: var(--clearshift-teal);
+    border-color: var(--clearshift-teal);
+    color: white;
+    box-shadow: 0 0 0 3px rgba(74, 157, 168, 0.25) !important;
+}
+
+.btn-outline-primary:active,
+.btn-outline-primary.active {
+    background-color: var(--clearshift-orange) !important;
+    border-color: var(--clearshift-orange) !important;
+    color: white !important;
+    box-shadow: 0 0 0 3px rgba(247, 148, 29, 0.25) !important;
+}
+
+/* Remove Bootstrap's default focus outline for all buttons */
+.btn:focus,
+.btn:active:focus,
+.btn.active:focus {
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(247, 148, 29, 0.25) !important;
+}
+
+.compare-button {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: var(--border-radius);
+    border: none;
+    color: white;
+    cursor: pointer;
+    box-shadow: var(--card-shadow);
+    transition: var(--transition);
+    min-width: 180px;
+    background: var(--clearshift-teal);
+    border-color: var(--clearshift-teal);
+}
+
+.compare-button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--card-shadow-hover);
+    background: var(--clearshift-teal-dark);
+    border-color: var(--clearshift-teal-dark);
+}
+
+.compare-button:active,
+.compare-button:focus,
+.compare-button.active {
+    background: var(--clearshift-orange) !important;
+    border-color: var(--clearshift-orange) !important;
+    box-shadow: 0 0 0 3px rgba(247, 148, 29, 0.25) !important;
+    transform: translateY(1px);
+}
+
+.compare-button:focus {
+    outline: none !important;
+}
+
+/* =================================
+   CARDS
+   ================================= */
+
+.result-card {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: var(--card-shadow);
+    transition: var(--transition);
+    border: 2px solid transparent;
+}
+
+.bank-card {
+    border-color: #e5e7eb;
+}
+
+.clearshift-card {
+    border-color: var(--clearshift-teal);
+    background: linear-gradient(135deg, var(--clearshift-light-teal) 0%, #f0fdf4 100%);
+}
+
+.result-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--card-shadow-hover);
+}
+
+.savings-card {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    max-width: 500px;
+    width: 100%;
+    margin: 0 auto;
+    box-shadow: var(--card-shadow);
+    border: 2px solid var(--clearshift-orange);
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+}
+
+/* =================================
+   FORMS
+   ================================= */
+
+/* Form Groups */
+.form-group {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-label {
+    display: block;
+    font-weight: 600;
+    color: var(--clearshift-blue);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.modern-input {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    border: 1px solid #e5e7eb;
+    border-radius: var(--border-radius);
+    font-size: 1.125rem;
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-weight: 400;
+    transition: var(--transition);
+    background: white;
+}
+
+.modern-input:focus {
+    outline: none;
+    border-color: var(--clearshift-teal);
+    box-shadow: 0 0 0 2px rgba(74, 157, 168, 0.1);
+}
+
+.input-group {
+    display: flex;
+}
+
+.input-group .modern-input {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-right: none;
+}
+
+.input-group-text {
+    padding: 1rem 1.25rem;
+    background: var(--clearshift-light-teal);
+    border: 1px solid #e5e7eb;
+    border-left: none;
+    border-top-right-radius: var(--border-radius);
+    border-bottom-right-radius: var(--border-radius);
+    color: var(--clearshift-teal);
+    font-weight: 600;
+    font-size: 1.125rem;
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Amount Section */
+.amount-section {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.amount-wrapper {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: var(--border-radius);
+    padding: 0.75rem 1rem;
+    transition: var(--transition);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    cursor: text;
+}
+
+.amount-wrapper:hover {
+    border-color: #d1d5db;
+}
+
+.amount-wrapper:focus-within {
+    border-color: var(--clearshift-teal);
+    box-shadow: 0 0 0 2px rgba(74, 157, 168, 0.1);
+}
+
+.amount-input {
+    width: 100%;
+    padding: 0.25rem 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    border: none;
+    background: transparent;
+    outline: none;
+}
+
+.amount-input::placeholder {
+    color: #9ca3af;
+}
+
+/* Currency Section */
+.currency-selector {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.currency-wrapper {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: var(--border-radius);
+    padding: 0.75rem 1rem;
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+    min-width: 120px;
+}
+
+.currency-wrapper:hover {
+    border-color: #d1d5db;
+}
+
+.currency-wrapper:focus-within {
+    border-color: var(--clearshift-teal);
+    box-shadow: 0 0 0 2px rgba(74, 157, 168, 0.1);
+}
+
+.currency-dropdown {
+    width: 100%;
+    padding: 0.25rem 2.5rem 0.25rem 0;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    transition: var(--transition);
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0 center;
+    background-repeat: no-repeat;
+    background-size: 1.25em 1.25em;
+    outline: none;
+    text-align: left;
+}
+
+.currency-dropdown:focus {
+    outline: none;
+}
+
+/* =================================
+   BADGES
+   ================================= */
+
+.rate-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.bank-badge {
+    background: #f3f4f6;
+    color: var(--clearshift-gray);
+}
+
+.clearshift-badge {
+    background: var(--clearshift-orange);
+    color: white;
+}
+
+/* =================================
+   ERROR TOAST
+   ================================= */
+
+.error-toast {
+    background: linear-gradient(135deg, #fff2f2 0%, #ffe6e6 100%);
+    border: 1px solid #ffcdd2;
+    border-left: 4px solid #f44336;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    padding: 0;
+    box-shadow: 0 2px 8px rgba(244, 67, 54, 0.1);
+    animation: slideIn 0.3s ease-out;
+    position: relative;
+}
+
+.error-toast-content {
+    display: flex;
+    align-items: center;
+    padding: 16px 20px;
+    gap: 12px;
+}
+
+.error-icon {
+    color: #f44336;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.error-message {
+    color: #c62828;
+    font-size: 14px;
+    font-weight: 500;
+    flex: 1;
+    line-height: 1.4;
+}
+
+.toast-close {
+    background: none;
+    border: none;
+    color: #c62828;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background-color 0.2s ease;
+}
+
+.toast-close:hover {
+    background-color: rgba(244, 67, 54, 0.1);
+}
+
+.toast-close i {
+    font-size: 16px;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* =================================
+   RESPONSIVE ADJUSTMENTS
+   ================================= */
+
+@media (max-width: 768px) {
+    .error-toast-content {
+        padding: 14px 16px;
+        gap: 10px;
+    }
+    
+    .error-message {
+        font-size: 13px;
+    }
+    
+    .error-icon {
+        font-size: 18px;
+    }
+
+    .form-label {
+        font-size: 0.85rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .modern-input {
+        padding: 0.65rem 0.75rem;
+        font-size: 0.9rem;
+    }
+
+    .input-group-text {
+        padding: 0.65rem 0.75rem;
+        font-size: 0.9rem;
+    }
+
+    .compare-button {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        min-width: 140px;
+    }
+
+    .result-card {
+        padding: 0.75rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .savings-card {
+        width: calc(100% - 1rem);
+        margin: 0 0.5rem;
+        padding: 0.875rem;
+        min-height: 140px;
+    }
+}
+
+@media (max-width: 576px) {
+    .amount-input {
+        font-size: 1.1rem;
+        padding: 0.75rem;
+        width: 100%;
+    }
+
+    .currency-dropdown {
+        padding: 0.75rem;
+        font-size: 0.9rem;
+        width: 100%;
+    }
+
+    .modern-input {
+        font-size: 0.85rem;
+        padding: 0.6rem;
+    }
+
+    .savings-card {
+        width: calc(100% - 0.5rem);
+        margin: 0 0.25rem;
+        padding: 0.75rem;
+    }
+
+    .result-card {
+        padding: 0.75rem;
+    }
+}
+
+@media (max-width: 400px) {
+    .amount-input {
+        font-size: 1rem;
+    }
+
+    .currency-dropdown {
+        font-size: 0.85rem;
+        padding: 0.6rem;
+    }
+
+    .modern-input {
+        font-size: 0.85rem;
+        padding: 0.6rem;
+    }
+}
