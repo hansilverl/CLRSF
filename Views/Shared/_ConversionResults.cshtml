@@ -113,13 +113,13 @@
                             <i class="bi bi-printer me-2"></i>
                             Print Results
                         </button>
-                        <button type="button" class="btn btn-success btn-lg">
-                            <i class="bi bi-download me-2"></i>
-                            Export Results
-                        </button>
-                        <button type="button" class="btn btn-primary btn-lg">
+                        <button type="button" class="btn btn-success btn-lg" onclick="exportReport()">
                             <i class="bi bi-file-earmark-pdf me-2"></i>
-                            Download Report
+                            Export ClearShift Report
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-lg" onclick="startNewComparison()">
+                            <i class="bi bi-arrow-clockwise me-2"></i>
+                            New Comparison
                         </button>
                     </div>
                 </div>
@@ -137,6 +137,49 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
             // Focus on amount input
             document.querySelector('input[name="Amount"]').focus();
+        }
+
+        function exportReport() {
+            // Create a form to submit the export request
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/Home/ExportReport';
+            
+            // Add current model data as hidden inputs
+            const modelData = {
+                'Date': '@Model.Date.ToString("yyyy-MM-dd")',
+                'Amount': '@Model.Amount',
+                'SourceCurrency': '@Model.SourceCurrency',
+                'TargetCurrency': '@Model.TargetCurrency',
+                'BankRate': '@Model.BankRate',
+                'BankFees': '@(Model.BankFees ?? 0)',
+                'CSFees': '@(Model.CSFees ?? 0)',
+                'b_convertedAmount': '@Model.b_convertedAmount',
+                'cs_convertedAmount': '@Model.cs_convertedAmount',
+                'Savings': '@Model.Savings'
+            };
+            
+            Object.keys(modelData).forEach(key => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = key;
+                input.value = modelData[key];
+                form.appendChild(input);
+            });
+            
+            // Add anti-forgery token
+            const token = document.querySelector('input[name="__RequestVerificationToken"]');
+            if (token) {
+                const tokenInput = document.createElement('input');
+                tokenInput.type = 'hidden';
+                tokenInput.name = '__RequestVerificationToken';
+                tokenInput.value = token.value;
+                form.appendChild(tokenInput);
+            }
+            
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
         }
     </script>
 }

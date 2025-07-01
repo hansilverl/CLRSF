@@ -4,6 +4,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - ClearShift Currency Comparison</title>
+    
+    <!-- Favicon - supports both .ico and .jpg -->
+    <link rel="icon" type="image/x-icon" href="~/images/favicon.ico">
+    <link rel="icon" type="image/jpeg" href="~/images/fav.jpg">
+    <link rel="shortcut icon" href="~/images/favicon.ico">
+    
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
@@ -12,13 +18,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Custom CSS -->
     <link href="~/css/site.css" rel="stylesheet" />
+    <link href="~/css/export.css" rel="stylesheet" />
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
         <div class="container">
             <a class="navbar-brand" href="/">
-                <i class="bi bi-currency-exchange me-2 text-primary"></i>
-                <span class="brand-text">ClearShift</span>
+                <!-- ClearShift logo in leftmost corner -->
+                <img src="~/images/logo.png" alt="ClearShift" height="32" class="navbar-logo" 
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+                <i class="bi bi-currency-exchange text-primary" style="display:none;"></i>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -43,8 +52,10 @@
             <div class="row">
                 <div class="col-md-6">
                     <div class="footer-brand">
-                        <i class="bi bi-currency-exchange me-2 text-primary"></i>
-                        <span class="brand-text">ClearShift</span>
+                        <!-- Footer logo or icon -->
+                        <img src="~/images/logo.png" alt="ClearShift" height="24" class="me-2 footer-logo" 
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+                        <i class="bi bi-currency-exchange me-2 text-primary" style="display:none;"></i>
                     </div>
                     <p class="text-muted mt-2 mb-0">
                         Compare currency exchange rates and save money on your international transfers.
@@ -71,6 +82,9 @@
     <!-- Validation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+    
+    <!-- ClearShift Logo Handler -->
+    <script src="~/js/logo-handler.js"></script>
     
     @await RenderSectionAsync("Scripts", required: false)
 </body>
