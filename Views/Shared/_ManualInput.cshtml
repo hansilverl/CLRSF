@@ -9,9 +9,11 @@
                 Amount
             </label>
             <div class="amount-wrapper">
-                <input asp-for="Amount" type="text" class="amount-input" placeholder="50,000" autocomplete="off" />
+                <input id="AmountDisplay" type="text" class="amount-input" autocomplete="off" />
+                <input asp-for="Amount" type="hidden" id="Amount" />
             </div>
             <span asp-validation-for="Amount" class="validation-error"></span>
+            <span id="AmountCustomError" class="validation-error" style="display:none;">Enter an amount over 30K</span>
         </div>
 
         <div class="currency-pair-container">
@@ -103,7 +105,6 @@
 </form>
 
 <script>
-    // Format number with commas for display
     function formatNumberWithCommas(num) {
         let cleanNum = num.toString().replace(/[^\d.]/g, '');
         let parts = cleanNum.split('.');
@@ -112,35 +113,57 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        const amountInput = document.getElementById('Amount');
-        if (!amountInput) return;
+        const amountDisplay = document.getElementById('AmountDisplay');
+        const amountHidden = document.getElementById('Amount');
+        if (!amountDisplay || !amountHidden) return;
 
-        // Format on load
-        if (amountInput.value && amountInput.value !== '0') {
-            amountInput.value = formatNumberWithCommas(amountInput.value);
+        // Initialize display with formatted value if present
+        if (amountHidden.value && amountHidden.value !== '0') {
+            amountDisplay.value = formatNumberWithCommas(amountHidden.value);
         }
 
-        // Format on input
-        amountInput.addEventListener('input', function (e) {
-            let cursor = e.target.selectionStart;
+        // On input, format display and update hidden
+        amountDisplay.addEventListener('input', function (e) {
             let raw = e.target.value.replace(/,/g, '');
             if (raw) {
                 let formatted = formatNumberWithCommas(raw);
-                e.target.value = formatted;
-                // Try to keep cursor at end
-                setTimeout(() => {
-                    e.target.setSelectionRange(e.target.value.length, e.target.value.length);
-                }, 0);
+                amountDisplay.value = formatted;
+                amountHidden.value = raw;
+                // Hide error if valid, but don't show if invalid
+                const customError = document.getElementById('AmountCustomError');
+                if (parseFloat(raw) >= 30000 || raw === '') {
+                    customError.style.display = 'none';
+                }
+            } else {
+                amountHidden.value = '';
+                document.getElementById('AmountCustomError').style.display = 'none';
             }
         });
 
-        // Remove commas before submit, but restore formatted value immediately after
-        document.querySelector('.modern-form').addEventListener('submit', function (e) {
-            const formattedValue = amountInput.value;
-            amountInput.value = formattedValue.replace(/,/g, '');
+        // On blur, show error if invalid
+        amountDisplay.addEventListener('blur', function (e) {
+            let raw = e.target.value.replace(/,/g, '');
+            const customError = document.getElementById('AmountCustomError');
+            if (raw && parseFloat(raw) < 30000) {
+                customError.style.display = '';
+            } else {
+                customError.style.display = 'none';
+            }
+        });
+
+        // On paste, format and update hidden
+        amountDisplay.addEventListener('paste', function (e) {
             setTimeout(() => {
-                amountInput.value = formattedValue;
-            }, 1); // Restore after form submission
+                let raw = amountDisplay.value.replace(/,/g, '');
+                amountDisplay.value = formatNumberWithCommas(raw);
+                amountHidden.value = raw;
+            }, 0);
+        });
+
+        // On submit, ensure hidden field is correct
+        document.querySelector('.modern-form').addEventListener('submit', function () {
+            let raw = amountDisplay.value.replace(/,/g, '');
+            amountHidden.value = raw;
         });
     });
 

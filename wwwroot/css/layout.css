@@ -443,11 +443,6 @@
     background: rgba(239, 68, 68, 0.05);
 }
 
-.is-invalid .upload-area:hover {
-    border-color: var(--danger-color);
-    background: rgba(239, 68, 68, 0.1);
-}
-
 /* =================================
    RESULTS SECTION
    ================================= */
@@ -1291,4 +1286,24 @@
     .primary-row {
         margin-bottom: 1rem;
     }
+}
+
+/* Remove extra spacing and padding above the custom error line for amount input */
+.amount-section .validation-error {
+    /* Remove font-size override so it matches the default */
+    margin-top: 2px;
+    padding-top: 0;
+    line-height: 1.2;
+    min-height: 0;
+    display: block;
+    transition: opacity 0.15s;
+}
+#AmountCustomError[style*="display:none"] {
+    margin: 0;
+    padding: 0;
+    height: 0;
+    opacity: 0;
+}
+#AmountCustomError {
+    opacity: 1;
 }
