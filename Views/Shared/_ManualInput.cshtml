@@ -9,7 +9,7 @@
                 Amount
             </label>
             <div class="amount-wrapper">
-                <input asp-for="Amount" type="text" class="amount-input" placeholder="50,000" id="amountInput" />
+                <input asp-for="Amount" type="text" class="amount-input" placeholder="50,000" />
             </div>
             <span asp-validation-for="Amount" class="validation-error"></span>
         </div>
@@ -21,8 +21,7 @@
                         From
                     </label>
                     <div class="currency-wrapper">
-                        <select asp-for="SourceCurrency" class="currency-dropdown" id="sourceCurrency"
-                            onchange="handleCurrencyChange()">
+                        <select asp-for="SourceCurrency" class="currency-dropdown" onchange="handleCurrencyChange()">
                             @foreach (var currency in CurrencyConstants.AllowedCurrencies)
                             {
                                 <option value="@currency" selected="@(currency == Model.SourceCurrency)">
@@ -46,8 +45,7 @@
                         To
                     </label>
                     <div class="currency-wrapper">
-                        <select asp-for="TargetCurrency" class="currency-dropdown" id="targetCurrency"
-                            onchange="handleCurrencyChange()">
+                        <select asp-for="TargetCurrency" class="currency-dropdown" onchange="handleCurrencyChange()">
                             @foreach (var currency in CurrencyConstants.AllowedCurrencies)
                             {
                                 <option value="@currency" selected="@(currency == Model.TargetCurrency)">
@@ -127,7 +125,7 @@
 
     // Handle amount input formatting and validation
     document.addEventListener('DOMContentLoaded', function () {
-        const amountInput = document.getElementById('amountInput');
+        const amountInput = document.getElementById('Amount');
 
         // Format existing value on page load
         if (amountInput.value && amountInput.value !== '0') {
@@ -216,8 +214,8 @@
     });
 
     function handleCurrencyChange() {
-        const sourceDropdown = document.getElementById('sourceCurrency');
-        const targetDropdown = document.getElementById('targetCurrency');
+        const sourceDropdown = document.getElementById('SourceCurrency');
+        const targetDropdown = document.getElementById('TargetCurrency');
         const sourceValue = sourceDropdown.value;
         const targetValue = targetDropdown.value;
 
@@ -237,8 +235,8 @@
     }
 
     function swapCurrencies() {
-        const sourceDropdown = document.getElementById('sourceCurrency');
-        const targetDropdown = document.getElementById('targetCurrency');
+        const sourceDropdown = document.getElementById('SourceCurrency');
+        const targetDropdown = document.getElementById('TargetCurrency');
 
         const tempValue = sourceDropdown.value;
         sourceDropdown.value = targetDropdown.value;
