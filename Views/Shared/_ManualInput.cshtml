@@ -134,9 +134,13 @@
             }
         });
 
-        // Remove commas before submit
-        document.querySelector('.modern-form').addEventListener('submit', function () {
-            amountInput.value = amountInput.value.replace(/,/g, '');
+        // Remove commas before submit, but restore formatted value immediately after
+        document.querySelector('.modern-form').addEventListener('submit', function (e) {
+            const formattedValue = amountInput.value;
+            amountInput.value = formattedValue.replace(/,/g, '');
+            setTimeout(() => {
+                amountInput.value = formattedValue;
+            }, 1); // Restore after form submission
         });
     });
 
