@@ -19,7 +19,7 @@ namespace CurrencyComparisonTool.Models
         public decimal? CSFees { get; set; }
 
         [Required]
-        [Range(30000.01, double.MaxValue, ErrorMessage = "Enter an amount over 30K")]
+        [Range(30000.0, double.MaxValue, ErrorMessage = "Enter an amount over 30K")]
         public decimal Amount { get; set; }
 
         [Required]
