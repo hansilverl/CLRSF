@@ -261,8 +261,8 @@ namespace CurrencyComparisonTool.Services
             section.AddParagraph("");
             var footerPara = section.AddParagraph();
             footerPara.AddText("This report is generated for informational purposes only. ");
-            footerPara.AddText("Exchange rates are based on Bank of Israel published rates and may not reflect real-time market conditions. ");
-            footerPara.AddText("Actual rates may vary based on market conditions, transaction specifics, and bank policies. Please consult your financial provider for the most accurate and up-to-date information.");
+            footerPara.AddText("Exchange rates are based on Bank of Israel published rates. ");
+            footerPara.AddText("Actual rates may vary based on market conditions and transaction specifics.");
             footerPara.Style = "Footer";
             footerPara.Format.Alignment = ParagraphAlignment.Center;
         }
