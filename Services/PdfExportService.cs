@@ -140,7 +140,9 @@ namespace CurrencyComparisonTool.Services
             subHeaderPara.Style = "SubHeader";
             subHeaderPara.Format.SpaceBefore = Unit.FromPoint(0);
             // Add blank line after logo/subheader
-            companyCell.AddParagraph("");
+            var blank = companyCell.AddParagraph("");
+            blank.Format.SpaceBefore = Unit.FromPoint(2);
+            blank.Format.SpaceAfter = Unit.FromPoint(2);
 
             // Right: Report info (Report ID and Generated Date)
             var infoCell = row.Cells[1];
@@ -163,13 +165,17 @@ namespace CurrencyComparisonTool.Services
                 r.BottomPadding = 0;
             }
             // Add blank line after header
-            section.AddParagraph("");
+            var headerSpace = section.AddParagraph("");
+            headerSpace.Format.SpaceBefore = Unit.FromPoint(2);
+            headerSpace.Format.SpaceAfter = Unit.FromPoint(2);
         }
 
         private void AddTransactionDetails(Section section, ExportReportModel reportModel)
         {
             section.AddParagraph("Transaction Details", "SectionHeader");
-            section.AddParagraph(""); // Blank line after section header
+            var space = section.AddParagraph("");
+            space.Format.SpaceBefore = Unit.FromPoint(2);
+            space.Format.SpaceAfter = Unit.FromPoint(2);
             var table = section.AddTable();
             table.Borders.Width = 0;
             table.AddColumn(Unit.FromCentimeter(8));
@@ -179,13 +185,17 @@ namespace CurrencyComparisonTool.Services
             AddTableRow(table, "Amount:", $"{reportModel.Amount:N2} {reportModel.SourceCurrency}");
             AddTableRow(table, "Currency Pair:", $"{reportModel.SourceCurrency} → {reportModel.TargetCurrency}");
             // Add blank line after section
-            section.AddParagraph("");
+            var after = section.AddParagraph("");
+            after.Format.SpaceBefore = Unit.FromPoint(2);
+            after.Format.SpaceAfter = Unit.FromPoint(2);
         }
 
         private void AddComparisonAnalysis(Section section, ExportReportModel reportModel)
         {
             section.AddParagraph("Conversion Comparison", "SectionHeader");
-            section.AddParagraph(""); // Blank line after section header
+            var space = section.AddParagraph("");
+            space.Format.SpaceBefore = Unit.FromPoint(2);
+            space.Format.SpaceAfter = Unit.FromPoint(2);
             var table = section.AddTable();
             table.Borders.Width = 0;
             table.AddColumn(Unit.FromCentimeter(6));
@@ -221,13 +231,17 @@ namespace CurrencyComparisonTool.Services
                 reportModel.BankConvertedAmount.ToString("N2"),
                 reportModel.ClearShiftConvertedAmount.ToString("N2"));
             // Add blank line after section
-            section.AddParagraph("");
+            var after = section.AddParagraph("");
+            after.Format.SpaceBefore = Unit.FromPoint(2);
+            after.Format.SpaceAfter = Unit.FromPoint(2);
         }
 
         private void AddSummary(Section section, ExportReportModel reportModel)
         {
             section.AddParagraph("Summary", "SectionHeader");
-            section.AddParagraph(""); // Blank line after section header
+            var space = section.AddParagraph("");
+            space.Format.SpaceBefore = Unit.FromPoint(2);
+            space.Format.SpaceAfter = Unit.FromPoint(2);
             var table = section.AddTable();
             table.Borders.Width = 0;
             table.AddColumn(Unit.FromCentimeter(18));
@@ -252,17 +266,21 @@ namespace CurrencyComparisonTool.Services
             var percentagePara = cell.AddParagraph(percentageText);
             percentagePara.Style = "Body";
             // Add blank line after section
-            section.AddParagraph("");
+            var after = section.AddParagraph("");
+            after.Format.SpaceBefore = Unit.FromPoint(2);
+            after.Format.SpaceAfter = Unit.FromPoint(2);
         }
 
         private void AddFooter(Section section)
         {
             // Add blank line before footer
-            section.AddParagraph("");
+            var space = section.AddParagraph("");
+            space.Format.SpaceBefore = Unit.FromPoint(6);
+            space.Format.SpaceAfter = Unit.FromPoint(6);
             var footerPara = section.AddParagraph();
             footerPara.AddText("This report is generated for informational purposes only. ");
-            footerPara.AddText("Exchange rates are based on Bank of Israel published rates and may not reflect real-time market conditions. ");
-            footerPara.AddText("Actual rates may vary based on market conditions, transaction specifics, and bank policies. Please consult your financial provider for the most accurate and up-to-date information.");
+            footerPara.AddText("Exchange rates are based on Bank of Israel published rates. ");
+            footerPara.AddText("Actual rates may vary based on market conditions and transaction specifics.");
             footerPara.Style = "Footer";
             footerPara.Format.Alignment = ParagraphAlignment.Center;
         }
@@ -274,7 +292,9 @@ namespace CurrencyComparisonTool.Services
             separatorPara.Format.Font.Color = Color.FromRgb(211, 211, 211);
             separatorPara.Format.Alignment = ParagraphAlignment.Center;
             // Add blank line after separator
-            section.AddParagraph("");
+            var space = section.AddParagraph("");
+            space.Format.SpaceBefore = Unit.FromPoint(2);
+            space.Format.SpaceAfter = Unit.FromPoint(2);
         }
 
         private void AddTableRow(Table table, string label, string value)
