@@ -1,6 +1,7 @@
 using CurrencyComparisonTool.Models;
-using iTextSharp.text;
-using iTextSharp.text.pdf;
+using MigraDoc.DocumentObjectModel;
+using MigraDoc.DocumentObjectModel.Tables;
+using MigraDoc.Rendering;
 using System.IO;
 
 namespace CurrencyComparisonTool.Services
@@ -8,7 +9,7 @@ namespace CurrencyComparisonTool.Services
     public class PdfExportService : IExportService
     {
         private readonly IWebHostEnvironment _environment;
-        
+
         public PdfExportService(IWebHostEnvironment environment)
         {
             _environment = environment;
@@ -16,24 +17,13 @@ namespace CurrencyComparisonTool.Services
 
         public byte[] GeneratePdfReport(ExportReportModel reportModel)
         {
-            using var memoryStream = new MemoryStream();
-            var document = new Document(PageSize.A4, 50, 50, 50, 50);
-            var writer = PdfWriter.GetInstance(document, memoryStream);
-            
-            document.Open();
-            
-            // Add content
-            AddHeader(document, reportModel);
-            AddSeparator(document);
-            AddTransactionDetails(document, reportModel);
-            AddSeparator(document);
-            AddComparisonAnalysis(document, reportModel);
-            AddSeparator(document);
-            AddSummary(document, reportModel);
-            AddFooter(document, reportModel);
-            
-            document.Close();
-            return memoryStream.ToArray();
+            var document = CreateDocument(reportModel);
+            var renderer = new PdfDocumentRenderer(true) { Document = document };
+            renderer.RenderDocument();
+
+            using var stream = new MemoryStream();
+            renderer.PdfDocument.Save(stream);
+            return stream.ToArray();
         }
 
         public async Task<byte[]> GeneratePdfReportAsync(ExportReportModel reportModel)
@@ -47,200 +37,276 @@ namespace CurrencyComparisonTool.Services
             return $"ClearShift_Report_{reportModel.ReportId}_{timestamp}.pdf";
         }
 
-        private void AddHeader(Document document, ExportReportModel reportModel)
+        private Document CreateDocument(ExportReportModel reportModel)
         {
-            // Company branding section
-            var headerTable = new PdfPTable(2) { WidthPercentage = 100 };
-            headerTable.SetWidths(new float[] { 2, 1 });
-            
-            // Left side - Company info with logo
-            var companyCell = new PdfPCell();
-            companyCell.Border = Rectangle.NO_BORDER;
-            
-            // Try to add logo
+            var doc = new Document();
+            DefineStyles(doc);
+
+            var section = doc.AddSection();
+            section.PageSetup.PageFormat = PageFormat.A4;
+            section.PageSetup.LeftMargin = Unit.FromPoint(50);
+            section.PageSetup.RightMargin = Unit.FromPoint(50);
+            section.PageSetup.TopMargin = Unit.FromPoint(50);
+            section.PageSetup.BottomMargin = Unit.FromPoint(50);
+
+            AddHeader(section, reportModel);
+            AddSeparator(section);
+            AddTransactionDetails(section, reportModel);
+            AddSeparator(section);
+            AddComparisonAnalysis(section, reportModel);
+            AddSeparator(section);
+            AddSummary(section, reportModel);
+            AddFooter(section);
+
+            return doc;
+        }
+
+        private void DefineStyles(Document doc)
+        {
+            var normal = doc.Styles["Normal"];
+            normal.Font.Name = "Helvetica";
+            normal.Font.Size = 11;
+            normal.Font.Color = Color.FromRgb(73, 80, 87);
+
+            var header = doc.Styles.AddStyle("Header", "Normal");
+            header.Font.Size = 24;
+            header.Font.Bold = true;
+            header.Font.Color = Color.FromRgb(52, 58, 64);
+
+            var subHeader = doc.Styles.AddStyle("SubHeader", "Normal");
+            subHeader.Font.Size = 14;
+            subHeader.Font.Bold = true;
+            subHeader.Font.Color = Color.FromRgb(255, 255, 255);
+
+            var sectionHeader = doc.Styles.AddStyle("SectionHeader", "Normal");
+            sectionHeader.Font.Size = 16;
+            sectionHeader.Font.Bold = true;
+            sectionHeader.Font.Color = Color.FromRgb(52, 58, 64);
+
+            var body = doc.Styles.AddStyle("Body", "Normal");
+            body.Font.Size = 11;
+            body.Font.Color = Color.FromRgb(73, 80, 87);
+
+            var highlight = doc.Styles.AddStyle("Highlight", "Normal");
+            highlight.Font.Size = 14;
+            highlight.Font.Bold = true;
+            highlight.Font.Color = Color.FromRgb(40, 167, 69);
+
+            var footer = doc.Styles.AddStyle("Footer", "Normal");
+            footer.Font.Size = 9;
+            footer.Font.Italic = true;
+            footer.Font.Color = Color.FromRgb(108, 117, 125);
+        }
+
+        private void AddHeader(Section section, ExportReportModel reportModel)
+        {
+            var table = section.AddTable();
+            table.Borders.Width = 0;
+            table.Rows.LeftIndent = 0;
+            table.AddColumn(Unit.FromCentimeter(12));
+            table.AddColumn(Unit.FromCentimeter(6));
+            var row = table.AddRow();
+            row.TopPadding = 0;
+            row.BottomPadding = 0;
+            row.Cells[0].VerticalAlignment = VerticalAlignment.Top;
+            row.Cells[1].VerticalAlignment = VerticalAlignment.Top;
+
+            // Left: Logo and company info
+            var companyCell = row.Cells[0];
+            companyCell.Borders.Width = 0;
             var logoPath = Path.Combine(_environment.WebRootPath, "images", "logo.png");
-            
             if (File.Exists(logoPath))
             {
                 try
                 {
-                    var logo = Image.GetInstance(logoPath);
-                    logo.ScaleToFit(120f, 40f);
-                    logo.Alignment = Element.ALIGN_LEFT;
-                    companyCell.AddElement(logo);
-                    companyCell.AddElement(new Paragraph(" ")); // Space after logo
+                    var logoPara = companyCell.AddParagraph();
+                    var image = logoPara.AddImage(logoPath);
+                    image.LockAspectRatio = true;
+                    image.Width = Unit.FromPoint(120);
+                    logoPara.Format.SpaceAfter = Unit.FromPoint(0);
                 }
                 catch
                 {
-                    // If logo fails to load, fall back to text
-                    companyCell.AddElement(new Paragraph("ClearShift", GetHeaderFont()));
+                    var companyPara = companyCell.AddParagraph("ClearShift");
+                    companyPara.Style = "Header";
                 }
             }
             else
             {
-                companyCell.AddElement(new Paragraph("ClearShift", GetHeaderFont()));
+                var companyPara = companyCell.AddParagraph("ClearShift");
+                companyPara.Style = "Header";
             }
-            
-            companyCell.AddElement(new Paragraph("Currency Conversion Analysis", GetSubHeaderFont()));
-            headerTable.AddCell(companyCell);
-            
-            // Right side - Report info
-            var reportInfoCell = new PdfPCell();
-            reportInfoCell.Border = Rectangle.NO_BORDER;
-            reportInfoCell.HorizontalAlignment = Element.ALIGN_RIGHT;
-            reportInfoCell.AddElement(new Paragraph($"Report ID: {reportModel.ReportId}", GetBodyFont()));
-            reportInfoCell.AddElement(new Paragraph($"Generated: {reportModel.GeneratedDate:dd/MM/yyyy HH:mm}", GetBodyFont()));
-            headerTable.AddCell(reportInfoCell);
-            
-            document.Add(headerTable);
-            document.Add(new Paragraph(" ")); // Space
+            companyCell.AddParagraph(" "); // Space after logo
+            var subHeaderPara = companyCell.AddParagraph("Currency Conversion Analysis");
+            subHeaderPara.Style = "SubHeader";
+            subHeaderPara.Format.SpaceBefore = Unit.FromPoint(5);
+
+            // Right: Report info
+            var infoCell = row.Cells[1];
+            infoCell.Borders.Width = 0;
+            infoCell.Format.Alignment = ParagraphAlignment.Right;
+            infoCell.VerticalAlignment = VerticalAlignment.Top;
+            var reportIdPara = infoCell.AddParagraph($"Report ID: {reportModel.ReportId}");
+            reportIdPara.Style = "Body";
+            reportIdPara.Format.Alignment = ParagraphAlignment.Right;
+            reportIdPara.Format.SpaceBefore = Unit.FromPoint(0);
+            var generatedPara = infoCell.AddParagraph($"Generated: {reportModel.GeneratedDate:dd/MM/yyyy HH:mm}");
+            generatedPara.Style = "Body";
+            generatedPara.Format.Alignment = ParagraphAlignment.Right;
+            generatedPara.Format.SpaceBefore = Unit.FromPoint(0);
+            section.AddParagraph(); // Space
         }
 
-        private void AddTransactionDetails(Document document, ExportReportModel reportModel)
+        private void AddTransactionDetails(Section section, ExportReportModel reportModel)
         {
-            document.Add(new Paragraph("Transaction Details", GetSectionHeaderFont()));
-            document.Add(new Paragraph(" "));
-            
-            var table = new PdfPTable(2) { WidthPercentage = 100 };
-            table.SetWidths(new float[] { 1, 1 });
-            
+            section.AddParagraph("Transaction Details", "SectionHeader");
+            section.AddParagraph();
+
+            var table = section.AddTable();
+            table.Borders.Width = 0;
+            table.AddColumn(Unit.FromCentimeter(8));
+            table.AddColumn(Unit.FromCentimeter(10));
+
             AddTableRow(table, "Transaction Date:", reportModel.TransactionDate.ToString("dd/MM/yyyy"));
             AddTableRow(table, "Amount:", $"{reportModel.Amount:N2} {reportModel.SourceCurrency}");
             AddTableRow(table, "Currency Pair:", $"{reportModel.SourceCurrency} → {reportModel.TargetCurrency}");
-            
-            document.Add(table);
-            document.Add(new Paragraph(" "));
+
+            section.AddParagraph();
         }
 
-        private void AddComparisonAnalysis(Document document, ExportReportModel reportModel)
+        private void AddComparisonAnalysis(Section section, ExportReportModel reportModel)
         {
-            document.Add(new Paragraph("Conversion Comparison", GetSectionHeaderFont()));
-            document.Add(new Paragraph(" "));
-            
-            var table = new PdfPTable(3) { WidthPercentage = 100 };
-            table.SetWidths(new float[] { 1, 1, 1 });
-            
+            section.AddParagraph("Conversion Comparison", "SectionHeader");
+            section.AddParagraph();
+
+            var table = section.AddTable();
+            table.Borders.Width = 0;
+            table.AddColumn(Unit.FromCentimeter(6));
+            table.AddColumn(Unit.FromCentimeter(6));
+            table.AddColumn(Unit.FromCentimeter(6));
+
             // Header row
-            AddTableHeaderCell(table, "");
-            AddTableHeaderCell(table, "Traditional Bank");
-            AddTableHeaderCell(table, "ClearShift");
-            
-            // Exchange rate
-            AddTableRow(table, "Exchange Rate:", 
-                reportModel.BankRate.ToString("N4"), 
+            var headerRow = table.AddRow();
+            headerRow.Shading.Color = Color.FromRgb(52, 58, 64);
+            headerRow.Cells[0].AddParagraph("");
+            headerRow.Cells[1].AddParagraph("Traditional Bank").Style = "SubHeader";
+            headerRow.Cells[2].AddParagraph("ClearShift").Style = "SubHeader";
+            foreach (Cell cell in headerRow.Cells)
+            {
+                cell.Format.Alignment = ParagraphAlignment.Center;
+                cell.VerticalAlignment = VerticalAlignment.Center;
+                cell.Borders.Width = 0;
+                cell.Format.Font.Color = Color.FromRgb(255, 255, 255);
+                cell.Format.Font.Bold = true;
+                cell.Shading.Color = Color.FromRgb(52, 58, 64);
+                cell.Format.SpaceBefore = Unit.FromPoint(8);
+                cell.Format.SpaceAfter = Unit.FromPoint(8);
+            }
+
+            // Data rows
+            AddComparisonTableRow(table, "Exchange Rate:",
+                reportModel.BankRate.ToString("N4"),
                 reportModel.ClearShiftRate.ToString("N4"));
-            
-            // Fees
-            AddTableRow(table, "Fees (%):", 
-                reportModel.BankFees.ToString("N2") + "%", 
+            AddComparisonTableRow(table, "Fees (%):",
+                reportModel.BankFees.ToString("N2") + "%",
                 reportModel.ClearShiftFees.ToString("N2") + "%");
-            
-            // Final amount
-            AddTableRow(table, $"Final Amount ({reportModel.TargetCurrency}):", 
-                reportModel.BankConvertedAmount.ToString("N2"), 
+            AddComparisonTableRow(table, $"Final Amount ({reportModel.TargetCurrency}):",
+                reportModel.BankConvertedAmount.ToString("N2"),
                 reportModel.ClearShiftConvertedAmount.ToString("N2"));
-            
-            document.Add(table);
-            document.Add(new Paragraph(" "));
+
+            section.AddParagraph();
         }
 
-        private void AddSummary(Document document, ExportReportModel reportModel)
+        private void AddSummary(Section section, ExportReportModel reportModel)
         {
-            document.Add(new Paragraph("Summary", GetSectionHeaderFont()));
-            document.Add(new Paragraph(" "));
-            
-            var summaryTable = new PdfPTable(1) { WidthPercentage = 100 };
-            
-            var savingsText = reportModel.TotalSavings >= 0 
+            section.AddParagraph("Summary", "SectionHeader");
+            section.AddParagraph();
+
+            var table = section.AddTable();
+            table.Borders.Width = 0;
+            table.AddColumn(Unit.FromCentimeter(18));
+            var row = table.AddRow();
+            var cell = row.Cells[0];
+            cell.Shading.Color = Color.FromRgb(248, 249, 250);
+            cell.Format.LeftIndent = Unit.FromPoint(15);
+            cell.Format.RightIndent = Unit.FromPoint(15);
+            cell.Format.SpaceBefore = Unit.FromPoint(10);
+            cell.Format.SpaceAfter = Unit.FromPoint(10);
+            cell.Borders.Width = 0;
+
+            var savingsText = reportModel.TotalSavings >= 0
                 ? $"Potential Savings with ClearShift: {reportModel.TotalSavings:N2} {reportModel.TargetCurrency}"
                 : $"Additional Cost with ClearShift: {Math.Abs(reportModel.TotalSavings):N2} {reportModel.TargetCurrency}";
-            
-            var percentageText = reportModel.SavingsPercentage >= 0 
+            var percentageText = reportModel.SavingsPercentage >= 0
                 ? $"Savings Percentage: {reportModel.SavingsPercentage:N2}%"
                 : $"Additional Cost Percentage: {Math.Abs(reportModel.SavingsPercentage):N2}%";
-            
-            var summaryCell = new PdfPCell();
-            summaryCell.BackgroundColor = new BaseColor(248, 249, 250);
-            summaryCell.Padding = 15;
-            summaryCell.AddElement(new Paragraph(savingsText, GetHighlightFont()));
-            summaryCell.AddElement(new Paragraph(percentageText, GetBodyFont()));
-            summaryTable.AddCell(summaryCell);
-            
-            document.Add(summaryTable);
-            document.Add(new Paragraph(" "));
+
+            var savingsPara = cell.AddParagraph(savingsText);
+            savingsPara.Style = "Highlight";
+            var percentagePara = cell.AddParagraph(percentageText);
+            percentagePara.Style = "Body";
+
+            section.AddParagraph();
         }
 
-        private void AddFooter(Document document, ExportReportModel reportModel)
+        private void AddFooter(Section section)
         {
-            document.Add(new Paragraph(" "));
-            document.Add(new Paragraph(" "));
-            
-            var footerParagraph = new Paragraph();
-            footerParagraph.Add(new Chunk("This report is generated for informational purposes only. ", GetFooterFont()));
-            footerParagraph.Add(new Chunk("Exchange rates are based on Bank of Israel published rates. ", GetFooterFont()));
-            footerParagraph.Add(new Chunk("Actual rates may vary based on market conditions and transaction specifics.", GetFooterFont()));
-            footerParagraph.Alignment = Element.ALIGN_CENTER;
-            
-            document.Add(footerParagraph);
+            section.AddParagraph();
+            section.AddParagraph();
+
+            var footerPara = section.AddParagraph();
+            footerPara.AddText("This report is generated for informational purposes only. ");
+            footerPara.AddText("Exchange rates are based on Bank of Israel published rates. ");
+            footerPara.AddText("Actual rates may vary based on market conditions and transaction specifics.");
+            footerPara.Style = "Footer";
+            footerPara.Format.Alignment = ParagraphAlignment.Center;
         }
 
-        private void AddSeparator(Document document)
+        private void AddSeparator(Section section)
         {
-            var line = new Paragraph("_____________________________________________________________________");
-            line.Font = new Font(Font.HELVETICA, 8, Font.NORMAL, new BaseColor(211, 211, 211));
-            line.Alignment = Element.ALIGN_CENTER;
-            document.Add(line);
-            document.Add(new Paragraph(" "));
+            var separatorPara = section.AddParagraph("_____________________________________________________________________");
+            separatorPara.Format.Font.Size = 8;
+            separatorPara.Format.Font.Color = Color.FromRgb(211, 211, 211);
+            separatorPara.Format.Alignment = ParagraphAlignment.Center;
+            section.AddParagraph();
         }
 
-        private void AddTableRow(PdfPTable table, string label, string value)
+        private void AddTableRow(Table table, string label, string value)
         {
-            var labelCell = new PdfPCell(new Phrase(label, GetBodyFont()));
-            labelCell.Border = Rectangle.NO_BORDER;
-            labelCell.PaddingBottom = 5;
-            table.AddCell(labelCell);
-            
-            var valueCell = new PdfPCell(new Phrase(value, GetBodyFont()));
-            valueCell.Border = Rectangle.NO_BORDER;
-            valueCell.PaddingBottom = 5;
-            table.AddCell(valueCell);
+            var row = table.AddRow();
+            row.Format.SpaceAfter = Unit.FromPoint(5);
+
+            var labelCell = row.Cells[0];
+            labelCell.AddParagraph(label).Style = "Body";
+            labelCell.Borders.Width = 0;
+
+            var valueCell = row.Cells[1];
+            valueCell.AddParagraph(value).Style = "Body";
+            valueCell.Borders.Width = 0;
         }
 
-        private void AddTableRow(PdfPTable table, string label, string value1, string value2)
+        private void AddComparisonTableRow(Table table, string label, string value1, string value2)
         {
-            var labelCell = new PdfPCell(new Phrase(label, GetBodyFont()));
-            labelCell.Border = Rectangle.NO_BORDER;
-            labelCell.PaddingBottom = 5;
-            table.AddCell(labelCell);
-            
-            var value1Cell = new PdfPCell(new Phrase(value1, GetBodyFont()));
-            value1Cell.Border = Rectangle.NO_BORDER;
-            value1Cell.PaddingBottom = 5;
-            value1Cell.HorizontalAlignment = Element.ALIGN_CENTER;
-            table.AddCell(value1Cell);
-            
-            var value2Cell = new PdfPCell(new Phrase(value2, GetBodyFont()));
-            value2Cell.Border = Rectangle.NO_BORDER;
-            value2Cell.PaddingBottom = 5;
-            value2Cell.HorizontalAlignment = Element.ALIGN_CENTER;
-            table.AddCell(value2Cell);
-        }
+            var row = table.AddRow();
+            row.Height = Unit.FromPoint(25);
 
-        private void AddTableHeaderCell(PdfPTable table, string text)
-        {
-            var cell = new PdfPCell(new Phrase(text, GetSubHeaderFont()));
-            cell.BackgroundColor = new BaseColor(52, 58, 64);
-            cell.HorizontalAlignment = Element.ALIGN_CENTER;
-            cell.Padding = 8;
-            table.AddCell(cell);
-        }
+            var labelCell = row.Cells[0];
+            labelCell.Format.LeftIndent = Unit.FromPoint(10);
+            labelCell.VerticalAlignment = VerticalAlignment.Center;
+            labelCell.Borders.Width = 0;
+            labelCell.AddParagraph(label).Style = "Body";
 
-        // Font definitions for professional appearance
-        private Font GetHeaderFont() => new Font(Font.HELVETICA, 24, Font.BOLD, new BaseColor(52, 58, 64));
-        private Font GetSubHeaderFont() => new Font(Font.HELVETICA, 14, Font.BOLD, new BaseColor(255, 255, 255));
-        private Font GetSectionHeaderFont() => new Font(Font.HELVETICA, 16, Font.BOLD, new BaseColor(52, 58, 64));
-        private Font GetBodyFont() => new Font(Font.HELVETICA, 11, Font.NORMAL, new BaseColor(73, 80, 87));
-        private Font GetHighlightFont() => new Font(Font.HELVETICA, 14, Font.BOLD, new BaseColor(40, 167, 69));
-        private Font GetFooterFont() => new Font(Font.HELVETICA, 9, Font.ITALIC, new BaseColor(108, 117, 125));
+            var value1Cell = row.Cells[1];
+            value1Cell.Format.Alignment = ParagraphAlignment.Center;
+            value1Cell.VerticalAlignment = VerticalAlignment.Center;
+            value1Cell.Borders.Width = 0;
+            value1Cell.AddParagraph(value1).Style = "Body";
+
+            var value2Cell = row.Cells[2];
+            value2Cell.Format.Alignment = ParagraphAlignment.Center;
+            value2Cell.VerticalAlignment = VerticalAlignment.Center;
+            value2Cell.Borders.Width = 0;
+            value2Cell.AddParagraph(value2).Style = "Body";
+        }
     }
 }
