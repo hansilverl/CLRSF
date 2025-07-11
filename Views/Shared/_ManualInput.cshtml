@@ -161,9 +161,14 @@
         });
 
         // On submit, ensure hidden field is correct
-        document.querySelector('.modern-form').addEventListener('submit', function () {
+        document.querySelector('.modern-form').addEventListener('submit', function (e) {
             let raw = amountDisplay.value.replace(/,/g, '');
             amountHidden.value = raw;
+            // Append #results-anchor to form action so browser scrolls after reload
+            var form = e.target;
+            if (form.action.indexOf('#results-anchor') === -1) {
+                form.action = form.action + '#results-anchor';
+            }
         });
     });
 
