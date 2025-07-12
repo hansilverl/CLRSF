@@ -8,6 +8,7 @@ Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages();
 builder.Services.AddScoped<IExchangeRateService, BOIExchangeRateService>();
 builder.Services.AddScoped<IExportService, PdfExportService>();
 
@@ -24,11 +25,11 @@ app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthorization();
 
-app.MapStaticAssets();
-
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
-    .WithStaticAssets();
+    ;
+
+app.MapRazorPages();
 
 app.Run();
