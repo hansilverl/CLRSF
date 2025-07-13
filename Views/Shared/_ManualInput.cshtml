@@ -9,7 +9,7 @@
                 Amount
             </label>
             <div class="amount-wrapper">
-                <input id="AmountDisplay" type="text" class="amount-input" autocomplete="off" />
+                <input id="AmountDisplay" type="text" class="amount-input" autocomplete="off" placeholder="50,000" />
                 <input asp-for="Amount" type="hidden" id="Amount" />
             </div>
             <span asp-validation-for="Amount" class="validation-error"></span>
