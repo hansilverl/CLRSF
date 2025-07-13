@@ -104,9 +104,8 @@
                 </div>
             </div>
             
-            <div class="pdf-canvas-container">
-                <canvas id="pdfCanvas"></canvas>
-                <div id="textLayer" class="text-layer"></div>
+            <div class="pdf-content-container">
+                <div id="pdfTextContent" class="pdf-text-content"></div>
             </div>
         </div>
         
@@ -176,9 +175,7 @@ let pdfDoc = null;
 let pageNum = 1;
 let pageRendering = false;
 let pageNumPending = null;
-let scale = 1.2;
-let canvas = null;
-let ctx = null;
+let scale = 1.0;
 let selectedText = '';
 let currentFile = null;
 let mappedFields = {
@@ -191,8 +188,6 @@ let mappedFields = {
 };
 
 document.addEventListener('DOMContentLoaded', function() {
-    canvas = document.getElementById('pdfCanvas');
-    ctx = canvas?.getContext('2d');
     
     // File input change handler
     document.getElementById('fileInput').addEventListener('change', function(e) {
@@ -305,38 +300,16 @@ function renderPage(num) {
     pdfDoc.getPage(num).then(function(page) {
         const viewport = page.getViewport({ scale: scale });
         
-        // Set canvas dimensions properly to avoid display issues
-        const outputScale = window.devicePixelRatio || 1;
-        
-        canvas.width = Math.floor(viewport.width * outputScale);
-        canvas.height = Math.floor(viewport.height * outputScale);
-        canvas.style.width = Math.floor(viewport.width) + "px";
-        canvas.style.height = Math.floor(viewport.height) + "px";
-        
-        const transform = outputScale !== 1 ? [outputScale, 0, 0, outputScale, 0, 0] : null;
-        
-        // Render PDF page into canvas context
-        const renderContext = {
-            canvasContext: ctx,
-            viewport: viewport,
-            transform: transform
-        };
-        
-        const renderTask = page.render(renderContext);
-        
-        // Wait for rendering to finish
-        renderTask.promise.then(function() {
+        // Get text content for rendering
+        return page.getTextContent().then(function(textContent) {
+            renderTextContent(textContent, viewport);
+            
             pageRendering = false;
             if (pageNumPending !== null) {
                 // New page rendering is pending
                 renderPage(pageNumPending);
                 pageNumPending = null;
             }
-            
-            // Get text content for selection
-            return page.getTextContent();
-        }).then(function(textContent) {
-            setupTextLayer(textContent, viewport);
         });
     });
     
@@ -344,52 +317,123 @@ function renderPage(num) {
     document.getElementById('pageNum').textContent = num;
 }
 
-// Setup text layer for selection
-function setupTextLayer(textContent, viewport) {
-    const textLayer = document.getElementById('textLayer');
-    textLayer.innerHTML = '';
+// Render text content as visible, selectable text
+function renderTextContent(textContent, viewport) {
+    const textContainer = document.getElementById('pdfTextContent');
+    textContainer.innerHTML = '';
     
-    // Position text layer to match canvas exactly
-    const canvasRect = canvas.getBoundingClientRect();
-    const containerRect = canvas.parentElement.getBoundingClientRect();
+    // Set container dimensions
+    textContainer.style.width = Math.floor(viewport.width) + 'px';
+    textContainer.style.height = Math.floor(viewport.height) + 'px';
+    textContainer.style.position = 'relative';
+    textContainer.style.background = '#ffffff';
+    textContainer.style.border = '1px solid #ddd';
+    textContainer.style.overflow = 'auto';
+    textContainer.style.fontFamily = 'Arial, sans-serif';
     
-    textLayer.style.position = 'absolute';
-    textLayer.style.left = (canvas.offsetLeft) + 'px';
-    textLayer.style.top = (canvas.offsetTop) + 'px';
-    textLayer.style.width = canvas.style.width;
-    textLayer.style.height = canvas.style.height;
-    textLayer.style.pointerEvents = 'auto';
+    // Group text items by approximate lines for better rendering
+    const lines = groupTextIntoLines(textContent.items, viewport);
     
-    // Create text elements
-    textContent.items.forEach(function(textItem) {
-        const textDiv = document.createElement('div');
-        textDiv.style.position = 'absolute';
+    // Render each line
+    lines.forEach(function(line, lineIndex) {
+        const lineDiv = document.createElement('div');
+        lineDiv.className = 'pdf-text-line';
+        lineDiv.style.position = 'absolute';
+        lineDiv.style.left = line.left + 'px';
+        lineDiv.style.top = line.top + 'px';
+        lineDiv.style.height = line.height + 'px';
+        lineDiv.style.lineHeight = line.height + 'px';
+        lineDiv.style.fontSize = Math.max(10, line.fontSize) + 'px';
+        lineDiv.style.color = '#000000';
+        lineDiv.style.cursor = 'text';
+        lineDiv.style.userSelect = 'text';
+        lineDiv.style.whiteSpace = 'nowrap';
+        lineDiv.style.overflow = 'visible';
         
-        // Fix positioning calculation
-        const x = textItem.transform[4];
-        const y = textItem.transform[5];
+        // Add all text items in this line
+        line.items.forEach(function(textItem, itemIndex) {
+            const textSpan = document.createElement('span');
+            textSpan.className = 'pdf-text-item';
+            textSpan.textContent = textItem.str;
+            textSpan.style.marginRight = (textItem.spaceAfter || 0) + 'px';
+            textSpan.style.fontWeight = textItem.fontName && textItem.fontName.includes('Bold') ? 'bold' : 'normal';
+            textSpan.style.fontStyle = textItem.fontName && textItem.fontName.includes('Italic') ? 'italic' : 'normal';
+            
+            lineDiv.appendChild(textSpan);
+        });
         
-        textDiv.style.left = (x * scale) + 'px';
-        textDiv.style.top = (viewport.height - y * scale - textItem.height * scale) + 'px';
-        textDiv.style.fontSize = (textItem.height * scale) + 'px';
-        textDiv.style.fontFamily = textItem.fontName || 'sans-serif';
-        textDiv.style.color = 'transparent';
-        textDiv.style.cursor = 'text';
-        textDiv.style.userSelect = 'text';
-        textDiv.style.whiteSpace = 'nowrap';
-        textDiv.style.transformOrigin = '0% 0%';
-        textDiv.className = 'pdf-text-item';
-        textDiv.textContent = textItem.str;
-        
-        textLayer.appendChild(textDiv);
+        textContainer.appendChild(lineDiv);
     });
     
     // Remove any existing selection tooltip
     removeSelectionTooltip();
     
     // Add selection listener
-    textLayer.addEventListener('mouseup', handleTextSelection);
+    textContainer.addEventListener('mouseup', handleTextSelection);
     document.addEventListener('mouseup', hideTooltipOnOutsideClick);
+}
+
+// Group text items into lines for better rendering
+function groupTextIntoLines(textItems, viewport) {
+    const lines = [];
+    const lineThreshold = 5; // pixels tolerance for same line
+    
+    textItems.forEach(function(textItem) {
+        const x = textItem.transform[4] * scale;
+        const y = viewport.height - (textItem.transform[5] * scale) - (textItem.height * scale);
+        const height = Math.max(12, textItem.height * scale); // Minimum height for readability
+        const fontSize = Math.max(10, height * 0.8); // Slightly smaller than height for better appearance
+        
+        // Find existing line or create new one
+        let targetLine = lines.find(line => 
+            Math.abs(line.top - y) <= lineThreshold && 
+            Math.abs(line.height - height) <= 3
+        );
+        
+        if (!targetLine) {
+            targetLine = {
+                top: y,
+                left: x,
+                height: height,
+                fontSize: fontSize,
+                items: []
+            };
+            lines.push(targetLine);
+        }
+        
+        // Update line bounds
+        targetLine.left = Math.min(targetLine.left, x);
+        
+        // Add text item to line
+        targetLine.items.push({
+            str: textItem.str,
+            x: x,
+            spaceAfter: 0,
+            fontName: textItem.fontName || '',
+            width: textItem.width * scale
+        });
+    });
+    
+    // Sort items within each line by x position and calculate spacing
+    lines.forEach(function(line) {
+        line.items.sort((a, b) => a.x - b.x);
+        
+        // Calculate space after each item based on actual spacing in PDF
+        for (let i = 0; i < line.items.length - 1; i++) {
+            const current = line.items[i];
+            const next = line.items[i + 1];
+            const estimatedWidth = current.width || (current.str.length * (line.fontSize * 0.6));
+            const gap = next.x - (current.x + estimatedWidth);
+            
+            // Add appropriate spacing (minimum 1px, maximum 50px)
+            current.spaceAfter = Math.max(1, Math.min(50, gap));
+        }
+    });
+    
+    // Sort lines by vertical position
+    lines.sort((a, b) => a.top - b.top);
+    
+    return lines;
 }
 
 // Handle text selection
@@ -487,7 +531,7 @@ function removeSelectionTooltip() {
 
 // Hide tooltip when clicking outside
 function hideTooltipOnOutsideClick(event) {
-    if (!event.target.closest('.selection-tooltip') && !event.target.closest('.text-layer')) {
+    if (!event.target.closest('.selection-tooltip') && !event.target.closest('.pdf-text-content')) {
         removeSelectionTooltip();
     }
 }
