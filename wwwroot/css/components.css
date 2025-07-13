@@ -409,16 +409,19 @@
 }
 
 /* =================================
-   PDF VIEWER COMPONENT
+   MODERNIZED PDF VIEWER COMPONENT
    ================================= */
 
 .pdf-viewer-section {
     margin-top: 3rem;
     padding: 2rem;
-    background: var(--surface-color);
+    background: linear-gradient(135deg, #f8f9fa, #ffffff);
     border-radius: 16px;
-    box-shadow: 0 8px 32px rgba(52, 58, 64, 0.12);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     border: 1px solid var(--border-light);
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
 }
 
 .pdf-viewer-header {
@@ -435,18 +438,19 @@
 }
 
 .pdf-viewer-container {
+    flex: 3;
     background: #fff;
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    margin-bottom: 2rem;
+    display: flex;
+    flex-direction: column;
 }
 
 .pdf-controls {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 1rem;
+    justify-content: space-between;
     padding: 1rem;
     background: var(--gray-50);
     border-bottom: 1px solid var(--border-light);
@@ -472,15 +476,74 @@
 }
 
 .pdf-content-container {
+    flex: 1;
     position: relative;
     overflow: auto;
-    max-height: 70vh;
     background: #f8f9fa;
     display: flex;
     justify-content: center;
     align-items: flex-start;
     padding: 1rem;
     border-radius: 8px;
+}
+
+.field-panel {
+    flex: 1;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.field-panel h5 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+}
+
+.field-item {
+    padding: 0.75rem 1rem;
+    background: var(--gray-50);
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.field-item:hover {
+    background: var(--clearshift-light-teal);
+    box-shadow: 0 4px 12px rgba(74, 157, 168, 0.2);
+}
+
+.field-item.selected {
+    border: 2px solid var(--clearshift-orange);
+    background: var(--clearshift-light-orange);
+}
+
+.field-item span {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.field-item input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+}
+
+.field-item input:focus {
+    border-color: var(--clearshift-teal);
+    box-shadow: 0 0 0 2px rgba(74, 157, 168, 0.2);
 }
 
 /* Consolidated tooltip styles */
@@ -494,6 +557,44 @@
     color: var(--text-secondary);
     z-index: 9999;
     animation: tooltipFadeIn 0.2s ease-out;
+}
+
+.selection-tooltip {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background: var(--gray-50);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-light);
+    min-width: 300px;
+    max-width: 100%;
+    z-index: 9999;
+    animation: tooltipFadeIn 0.2s ease-out;
+}
+
+.tooltip-button {
+    background: var(--clearshift-teal);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.tooltip-button i {
+    font-size: 1.25rem;
+}
+
+.tooltip-button:hover {
+    background: var(--clearshift-teal-dark);
+    box-shadow: 0 4px 12px rgba(74, 157, 168, 0.3);
 }
 
 @keyframes tooltipFadeIn {
@@ -510,19 +611,10 @@
 /* Responsive design for PDF viewer */
 @media (max-width: 768px) {
     .pdf-viewer-section {
-        margin-top: 2rem;
-        padding: 1rem;
-    }
-    .pdf-controls {
         flex-direction: column;
-        gap: 0.5rem;
     }
-    .zoom-controls {
-        margin-top: 0.5rem;
-    }
-    .pdf-canvas-container {
-        max-height: 50vh;
-        padding: 0.5rem;
+    .field-panel {
+        order: -1;
     }
 }
 
