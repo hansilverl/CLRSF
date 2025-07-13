@@ -2,50 +2,46 @@
 @model CurrencyComparisonModel
 
 <div class="upload-section">
-    <form asp-action="UploadFile" method="post" enctype="multipart/form-data" id="uploadForm">
-        @Html.AntiForgeryToken()
-        
-        <div class="upload-area" id="uploadArea" 
-             ondragover="handleDragOver(event)" 
-             ondragleave="handleDragLeave(event)" 
-             ondrop="handleFileDrop(event)">
-            <div class="upload-icon">
-                <i class="bi bi-cloud-upload"></i>
-            </div>
-            <h4>Upload Bank Statement</h4>
-            <p class="text-muted">
-                Drag & drop your bank statement here or click to browse
-            </p>
-            <p class="text-muted small">
-                Supported formats: PDF, CSV, and TXT files
-            </p>
-            
-            <div class="file-input-wrapper">
-                <input type="file" id="fileInput" name="file" class="file-input" accept=".pdf,.csv,.txt" />
-                <label for="fileInput" class="btn btn-outline-primary btn-lg">
-                    <i class="bi bi-paperclip me-2"></i>
-                    Choose File
-                </label>
-            </div>
-            
-            <div class="file-info" id="fileInfo" style="display: none;">
-                <div class="file-preview">
-                    <i class="bi bi-file-earmark-text"></i>
-                    <span class="file-name"></span>
-                    <button type="button" class="btn-remove" onclick="removeFile()">
-                        <i class="bi bi-x"></i>
-                    </button>
-                </div>
-            </div>
-            
-            <div id="uploadError" class="text-danger text-center mt-3" style="display: none;"></div>
-            
-            <button type="submit" id="uploadBtn" class="btn btn-primary mt-3" style="display: none;">
-                <i class="bi bi-upload me-2"></i>
-                Process File
-            </button>
+    <div class="upload-area" id="uploadArea" 
+         ondragover="handleDragOver(event)" 
+         ondragleave="handleDragLeave(event)" 
+         ondrop="handleFileDrop(event)">
+        <div class="upload-icon">
+            <i class="bi bi-cloud-upload"></i>
         </div>
-    </form>
+        <h4>Upload Bank Statement</h4>
+        <p class="text-muted">
+            Drag & drop your bank statement here or click to browse
+        </p>
+        <p class="text-muted small">
+            Supported formats: PDF, CSV, and TXT files
+        </p>
+        
+        <div class="file-input-wrapper">
+            <input type="file" id="fileInput" name="file" class="file-input" accept=".pdf,.csv,.txt" />
+            <label for="fileInput" class="btn btn-outline-primary btn-lg">
+                <i class="bi bi-paperclip me-2"></i>
+                Choose File
+            </label>
+        </div>
+        
+        <div class="file-info" id="fileInfo" style="display: none;">
+            <div class="file-preview">
+                <i class="bi bi-file-earmark-text"></i>
+                <span class="file-name"></span>
+                <button type="button" class="btn-remove" onclick="removeFile()">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div id="uploadError" class="text-danger text-center mt-3" style="display: none;"></div>
+        
+        <button type="button" id="uploadBtn" class="btn btn-primary mt-3" style="display: none;" onclick="processFile()">
+            <i class="bi bi-upload me-2"></i>
+            Process File
+        </button>
+    </div>
     
     <div class="upload-features">
         <div class="row">
@@ -78,14 +74,131 @@
             <small>Can't upload a file? <a href="#" onclick="switchToManual()">Switch to manual input</a></small>
         </p>
     </div>
+    
+    <!-- PDF Viewer Section -->
+    <div id="pdfViewerSection" class="pdf-viewer-section" style="display: none;">
+        <div class="pdf-viewer-header">
+            <h4><i class="bi bi-file-earmark-pdf me-2"></i>PDF Statement Viewer</h4>
+            <p class="text-muted">Select text from the PDF to populate form fields automatically</p>
+        </div>
+        
+        <div class="pdf-viewer-container">
+            <div class="pdf-controls">
+                <button type="button" class="btn btn-sm btn-outline-secondary" id="prevPage">
+                    <i class="bi bi-chevron-left"></i> Previous
+                </button>
+                <span class="page-info">
+                    Page <span id="pageNum">1</span> of <span id="pageCount">0</span>
+                </span>
+                <button type="button" class="btn btn-sm btn-outline-secondary" id="nextPage">
+                    <i class="bi bi-chevron-right"></i> Next
+                </button>
+                <div class="zoom-controls ms-3">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="zoomOut">
+                        <i class="bi bi-zoom-out"></i>
+                    </button>
+                    <span class="zoom-level">100%</span>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="zoomIn">
+                        <i class="bi bi-zoom-in"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="pdf-canvas-container">
+                <canvas id="pdfCanvas"></canvas>
+                <div id="textLayer" class="text-layer"></div>
+            </div>
+        </div>
+        
+        <div class="field-mapping-panel">
+            <h6>Field Mapping</h6>
+            <p class="small text-muted">Select text in the PDF above, then click a button below to map it to the corresponding field:</p>
+            <div class="mapping-buttons">
+                <button type="button" class="btn btn-sm btn-outline-primary mapping-btn" data-field="date">
+                    <i class="bi bi-calendar me-1"></i>Date
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-primary mapping-btn" data-field="amount">
+                    <i class="bi bi-currency-dollar me-1"></i>Amount
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-primary mapping-btn" data-field="sourceCurrency">
+                    <i class="bi bi-arrow-right me-1"></i>From Currency
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-primary mapping-btn" data-field="targetCurrency">
+                    <i class="bi bi-arrow-left me-1"></i>To Currency
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-primary mapping-btn" data-field="bankRate">
+                    <i class="bi bi-percent me-1"></i>Bank Rate
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-primary mapping-btn" data-field="fees">
+                    <i class="bi bi-receipt me-1"></i>Fees
+                </button>
+            </div>
+            
+            <div class="mapped-values mt-3">
+                <div class="row">
+                    <div class="col-md-6">
+                        <small class="text-muted">Selected Text:</small>
+                        <div id="selectedText" class="selected-text-display">No text selected</div>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted">Mapped Values:</small>
+                        <div id="mappedValues" class="mapped-values-display">
+                            <div class="mapped-item">Date: <span id="mappedDate">-</span></div>
+                            <div class="mapped-item">Amount: <span id="mappedAmount">-</span></div>
+                            <div class="mapped-item">From: <span id="mappedSourceCurrency">-</span></div>
+                            <div class="mapped-item">To: <span id="mappedTargetCurrency">-</span></div>
+                            <div class="mapped-item">Rate: <span id="mappedBankRate">-</span></div>
+                            <div class="mapped-item">Fees: <span id="mappedFees">-</span></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="action-buttons mt-3">
+                    <button type="button" class="btn btn-success" id="applyMappedValues">
+                        <i class="bi bi-check-circle me-2"></i>Apply to Form
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" id="clearMappings">
+                        <i class="bi bi-x-circle me-2"></i>Clear All
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script nonce="@ViewData["ScriptNonce"]">
+// Set the worker source for PDF.js
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+// Global variables for PDF handling
+let pdfDoc = null;
+let pageNum = 1;
+let pageRendering = false;
+let pageNumPending = null;
+let scale = 1.2;
+let canvas = null;
+let ctx = null;
+let selectedText = '';
+let currentFile = null;
+let mappedFields = {
+    date: '',
+    amount: '',
+    sourceCurrency: '',
+    targetCurrency: '',
+    bankRate: '',
+    fees: ''
+};
+
 document.addEventListener('DOMContentLoaded', function() {
+    canvas = document.getElementById('pdfCanvas');
+    ctx = canvas?.getContext('2d');
+    
     // File input change handler
     document.getElementById('fileInput').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) {
+            currentFile = file;
             processSelectedFile(file);
         }
     });
@@ -100,9 +213,484 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('fileInput').click();
         }
     });
+    
+    // PDF Controls
+    document.getElementById('prevPage')?.addEventListener('click', onPrevPage);
+    document.getElementById('nextPage')?.addEventListener('click', onNextPage);
+    document.getElementById('zoomIn')?.addEventListener('click', zoomIn);
+    document.getElementById('zoomOut')?.addEventListener('click', zoomOut);
+    
+    // Field mapping buttons
+    document.querySelectorAll('.mapping-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const field = this.dataset.field;
+            if (selectedText) {
+                mapFieldValue(field, selectedText);
+            } else {
+                alert('Please select text from the PDF first');
+            }
+        });
+    });
+    
+    // Action buttons
+    document.getElementById('applyMappedValues')?.addEventListener('click', applyMappedValuesToForm);
+    document.getElementById('clearMappings')?.addEventListener('click', clearAllMappings);
 });
 
-// Drag and drop handlers
+// Process file function
+function processFile() {
+    if (!currentFile) {
+        alert('Please select a file first');
+        return;
+    }
+    
+    const fileName = currentFile.name.toLowerCase();
+    const uploadBtn = document.getElementById('uploadBtn');
+    
+    // Show loading state
+    uploadBtn.innerHTML = '<i class="spinner-border spinner-border-sm me-2"></i>Processing...';
+    uploadBtn.disabled = true;
+    
+    if (fileName.endsWith('.pdf')) {
+        // Show PDF viewer and load the PDF
+        document.getElementById('pdfViewerSection').style.display = 'block';
+        loadPDF(currentFile);
+        
+        // Scroll to PDF viewer after a short delay
+        setTimeout(() => {
+            document.getElementById('pdfViewerSection').scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'start'
+            });
+            
+            // Reset button state
+            uploadBtn.innerHTML = '<i class="bi bi-upload me-2"></i>Process File';
+            uploadBtn.disabled = false;
+        }, 500);
+    } else {
+        // Handle other file types (CSV, TXT) - for future implementation
+        setTimeout(() => {
+            alert('Currently only PDF files are supported for viewer functionality');
+            uploadBtn.innerHTML = '<i class="bi bi-upload me-2"></i>Process File';
+            uploadBtn.disabled = false;
+        }, 1000);
+    }
+}
+
+// Load PDF function
+function loadPDF(file) {
+    const fileReader = new FileReader();
+    fileReader.onload = function() {
+        const typedarray = new Uint8Array(this.result);
+        
+        pdfjsLib.getDocument(typedarray).promise.then(function(pdf) {
+            pdfDoc = pdf;
+            document.getElementById('pageCount').textContent = pdf.numPages;
+            
+            // Render the first page
+            renderPage(pageNum);
+        }).catch(function(error) {
+            console.error('Error loading PDF:', error);
+            alert('Error loading PDF file. Please try a different file.');
+        });
+    };
+    fileReader.readAsArrayBuffer(file);
+}
+
+// Render page function
+function renderPage(num) {
+    pageRendering = true;
+    
+    // Get page
+    pdfDoc.getPage(num).then(function(page) {
+        const viewport = page.getViewport({ scale: scale });
+        
+        // Set canvas dimensions properly to avoid display issues
+        const outputScale = window.devicePixelRatio || 1;
+        
+        canvas.width = Math.floor(viewport.width * outputScale);
+        canvas.height = Math.floor(viewport.height * outputScale);
+        canvas.style.width = Math.floor(viewport.width) + "px";
+        canvas.style.height = Math.floor(viewport.height) + "px";
+        
+        const transform = outputScale !== 1 ? [outputScale, 0, 0, outputScale, 0, 0] : null;
+        
+        // Render PDF page into canvas context
+        const renderContext = {
+            canvasContext: ctx,
+            viewport: viewport,
+            transform: transform
+        };
+        
+        const renderTask = page.render(renderContext);
+        
+        // Wait for rendering to finish
+        renderTask.promise.then(function() {
+            pageRendering = false;
+            if (pageNumPending !== null) {
+                // New page rendering is pending
+                renderPage(pageNumPending);
+                pageNumPending = null;
+            }
+            
+            // Get text content for selection
+            return page.getTextContent();
+        }).then(function(textContent) {
+            setupTextLayer(textContent, viewport);
+        });
+    });
+    
+    // Update page counters
+    document.getElementById('pageNum').textContent = num;
+}
+
+// Setup text layer for selection
+function setupTextLayer(textContent, viewport) {
+    const textLayer = document.getElementById('textLayer');
+    textLayer.innerHTML = '';
+    
+    // Position text layer to match canvas exactly
+    const canvasRect = canvas.getBoundingClientRect();
+    const containerRect = canvas.parentElement.getBoundingClientRect();
+    
+    textLayer.style.position = 'absolute';
+    textLayer.style.left = (canvas.offsetLeft) + 'px';
+    textLayer.style.top = (canvas.offsetTop) + 'px';
+    textLayer.style.width = canvas.style.width;
+    textLayer.style.height = canvas.style.height;
+    textLayer.style.pointerEvents = 'auto';
+    
+    // Create text elements
+    textContent.items.forEach(function(textItem) {
+        const textDiv = document.createElement('div');
+        textDiv.style.position = 'absolute';
+        
+        // Fix positioning calculation
+        const x = textItem.transform[4];
+        const y = textItem.transform[5];
+        
+        textDiv.style.left = (x * scale) + 'px';
+        textDiv.style.top = (viewport.height - y * scale - textItem.height * scale) + 'px';
+        textDiv.style.fontSize = (textItem.height * scale) + 'px';
+        textDiv.style.fontFamily = textItem.fontName || 'sans-serif';
+        textDiv.style.color = 'transparent';
+        textDiv.style.cursor = 'text';
+        textDiv.style.userSelect = 'text';
+        textDiv.style.whiteSpace = 'nowrap';
+        textDiv.style.transformOrigin = '0% 0%';
+        textDiv.className = 'pdf-text-item';
+        textDiv.textContent = textItem.str;
+        
+        textLayer.appendChild(textDiv);
+    });
+    
+    // Remove any existing selection tooltip
+    removeSelectionTooltip();
+    
+    // Add selection listener
+    textLayer.addEventListener('mouseup', handleTextSelection);
+    document.addEventListener('mouseup', hideTooltipOnOutsideClick);
+}
+
+// Handle text selection
+function handleTextSelection(event) {
+    const selection = window.getSelection();
+    if (selection.toString().trim()) {
+        selectedText = selection.toString().trim();
+        document.getElementById('selectedText').textContent = selectedText;
+        
+        // Show selection tooltip
+        showSelectionTooltip(event);
+    } else {
+        removeSelectionTooltip();
+    }
+}
+
+// Show modern selection tooltip
+function showSelectionTooltip(event) {
+    // Remove existing tooltip
+    removeSelectionTooltip();
+    
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+    
+    const range = selection.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
+    
+    // Create tooltip
+    const tooltip = document.createElement('div');
+    tooltip.className = 'selection-tooltip';
+    tooltip.innerHTML = `
+        <div class="tooltip-header">
+            <span class="selected-text-preview">"${selectedText.substring(0, 20)}${selectedText.length > 20 ? '...' : ''}"</span>
+            <button class="tooltip-close" onclick="removeSelectionTooltip()">×</button>
+        </div>
+        <div class="tooltip-buttons">
+            <button class="tooltip-btn" data-field="date">
+                <i class="bi bi-calendar"></i> Date
+            </button>
+            <button class="tooltip-btn" data-field="amount">
+                <i class="bi bi-currency-dollar"></i> Amount
+            </button>
+            <button class="tooltip-btn" data-field="sourceCurrency">
+                <i class="bi bi-arrow-right"></i> From
+            </button>
+            <button class="tooltip-btn" data-field="targetCurrency">
+                <i class="bi bi-arrow-left"></i> To
+            </button>
+            <button class="tooltip-btn" data-field="bankRate">
+                <i class="bi bi-percent"></i> Rate
+            </button>
+            <button class="tooltip-btn" data-field="fees">
+                <i class="bi bi-receipt"></i> Fees
+            </button>
+        </div>
+    `;
+    
+    // Position tooltip above selection
+    const tooltipTop = rect.top + window.scrollY - 120;
+    const tooltipLeft = Math.max(10, Math.min(window.innerWidth - 320, rect.left + window.scrollX - 150));
+    
+    tooltip.style.position = 'absolute';
+    tooltip.style.top = tooltipTop + 'px';
+    tooltip.style.left = tooltipLeft + 'px';
+    tooltip.style.zIndex = '9999';
+    
+    document.body.appendChild(tooltip);
+    
+    // Add event listeners to tooltip buttons
+    tooltip.querySelectorAll('.tooltip-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const field = this.dataset.field;
+            mapFieldValue(field, selectedText);
+            removeSelectionTooltip();
+            
+            // Show success feedback
+            showFieldMappingSuccess(field, selectedText);
+        });
+    });
+    
+    // Auto-hide after 10 seconds
+    setTimeout(() => {
+        removeSelectionTooltip();
+    }, 10000);
+}
+
+// Remove selection tooltip
+function removeSelectionTooltip() {
+    const existingTooltip = document.querySelector('.selection-tooltip');
+    if (existingTooltip) {
+        existingTooltip.remove();
+    }
+}
+
+// Hide tooltip when clicking outside
+function hideTooltipOnOutsideClick(event) {
+    if (!event.target.closest('.selection-tooltip') && !event.target.closest('.text-layer')) {
+        removeSelectionTooltip();
+    }
+}
+
+// Show field mapping success feedback
+function showFieldMappingSuccess(field, value) {
+    const successToast = document.createElement('div');
+    successToast.className = 'mapping-success-toast';
+    successToast.innerHTML = `
+        <i class="bi bi-check-circle-fill"></i>
+        <span>Mapped "${value.substring(0, 15)}${value.length > 15 ? '...' : ''}" to ${field.charAt(0).toUpperCase() + field.slice(1)}</span>
+    `;
+    
+    document.body.appendChild(successToast);
+    
+    // Animate in
+    setTimeout(() => successToast.classList.add('show'), 100);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        successToast.classList.remove('show');
+        setTimeout(() => successToast.remove(), 300);
+    }, 3000);
+}
+
+// Navigation functions
+function onPrevPage() {
+    if (pageNum <= 1) return;
+    pageNum--;
+    queueRenderPage(pageNum);
+}
+
+function onNextPage() {
+    if (pageNum >= pdfDoc.numPages) return;
+    pageNum++;
+    queueRenderPage(pageNum);
+}
+
+function queueRenderPage(num) {
+    if (pageRendering) {
+        pageNumPending = num;
+    } else {
+        renderPage(num);
+    }
+}
+
+// Zoom functions
+function zoomIn() {
+    scale += 0.2;
+    document.querySelector('.zoom-level').textContent = Math.round(scale * 100) + '%';
+    renderPage(pageNum);
+}
+
+function zoomOut() {
+    if (scale <= 0.4) return;
+    scale -= 0.2;
+    document.querySelector('.zoom-level').textContent = Math.round(scale * 100) + '%';
+    renderPage(pageNum);
+}
+
+// Field mapping functions
+function mapFieldValue(field, value) {
+    mappedFields[field] = value;
+    document.getElementById('mapped' + field.charAt(0).toUpperCase() + field.slice(1)).textContent = value;
+    
+    // Clear selection
+    window.getSelection().removeAllRanges();
+    selectedText = '';
+    document.getElementById('selectedText').textContent = 'No text selected';
+}
+
+function clearAllMappings() {
+    Object.keys(mappedFields).forEach(field => {
+        mappedFields[field] = '';
+        document.getElementById('mapped' + field.charAt(0).toUpperCase() + field.slice(1)).textContent = '-';
+    });
+    document.getElementById('selectedText').textContent = 'No text selected';
+    selectedText = '';
+}
+
+function applyMappedValuesToForm() {
+    // Switch to manual tab
+    switchToManual();
+    
+    // Apply mapped values to form fields
+    setTimeout(() => {
+        if (mappedFields.date) {
+            const dateField = document.querySelector('input[name="Date"]');
+            if (dateField) {
+                // Try to parse and format the date
+                const parsedDate = parseDate(mappedFields.date);
+                if (parsedDate) {
+                    dateField.value = parsedDate;
+                }
+            }
+        }
+        
+        if (mappedFields.amount) {
+            const amountDisplay = document.getElementById('AmountDisplay');
+            const amountHidden = document.getElementById('Amount');
+            if (amountDisplay && amountHidden) {
+                // Extract numeric value
+                const numericAmount = extractNumericValue(mappedFields.amount);
+                if (numericAmount) {
+                    amountHidden.value = numericAmount;
+                    amountDisplay.value = formatNumberWithCommas(numericAmount);
+                }
+            }
+        }
+        
+        if (mappedFields.sourceCurrency) {
+            const sourceField = document.querySelector('select[name="SourceCurrency"]');
+            if (sourceField) {
+                // Try to match currency code
+                const currencyCode = extractCurrencyCode(mappedFields.sourceCurrency);
+                if (currencyCode) {
+                    sourceField.value = currencyCode;
+                }
+            }
+        }
+        
+        if (mappedFields.targetCurrency) {
+            const targetField = document.querySelector('select[name="TargetCurrency"]');
+            if (targetField) {
+                const currencyCode = extractCurrencyCode(mappedFields.targetCurrency);
+                if (currencyCode) {
+                    targetField.value = currencyCode;
+                }
+            }
+        }
+        
+        if (mappedFields.bankRate) {
+            const rateField = document.querySelector('input[name="BankRate"]');
+            if (rateField) {
+                const numericRate = extractNumericValue(mappedFields.bankRate);
+                if (numericRate) {
+                    rateField.value = numericRate;
+                }
+            }
+        }
+        
+        if (mappedFields.fees) {
+            const feesField = document.querySelector('input[name="BankFees"]');
+            if (feesField) {
+                const numericFees = extractNumericValue(mappedFields.fees);
+                if (numericFees) {
+                    feesField.value = numericFees;
+                }
+            }
+        }
+        
+        alert('Values applied to form successfully!');
+    }, 500);
+}
+
+// Utility functions
+function formatNumberWithCommas(num) {
+    let cleanNum = num.toString().replace(/[^\d.]/g, '');
+    let parts = cleanNum.split('.');
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return parts.join('.');
+}
+
+function parseDate(dateStr) {
+    // Try to parse various date formats
+    const patterns = [
+        /(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/,  // MM/DD/YYYY or DD/MM/YYYY
+        /(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/,  // YYYY/MM/DD
+    ];
+    
+    for (const pattern of patterns) {
+        const match = dateStr.match(pattern);
+        if (match) {
+            // Assume DD/MM/YYYY format for Israeli banks
+            const day = match[1].padStart(2, '0');
+            const month = match[2].padStart(2, '0');
+            const year = match[3];
+            return `${year}-${month}-${day}`;
+        }
+    }
+    return null;
+}
+
+function extractNumericValue(str) {
+    // Extract numeric value, handling commas and currency symbols
+    const match = str.replace(/[^\d.,]/g, '').replace(/,/g, '');
+    return match ? parseFloat(match) : null;
+}
+
+function extractCurrencyCode(str) {
+    // Common currency codes
+    const currencies = ['USD', 'EUR', 'GBP', 'ILS', 'JPY', 'CAD', 'AUD', 'CHF'];
+    const upperStr = str.toUpperCase();
+    
+    for (const currency of currencies) {
+        if (upperStr.includes(currency)) {
+            return currency;
+        }
+    }
+    return null;
+}
+
+// Existing functions (keep these)
 function handleDragOver(e) {
     e.preventDefault();
     e.stopPropagation();
@@ -137,6 +725,7 @@ function handleFileDrop(e) {
     const files = e.dataTransfer.files;
     if (files.length > 0) {
         const file = files[0];
+        currentFile = file;
         processSelectedFile(file);
         
         // Update the file input
@@ -209,6 +798,15 @@ function removeFile() {
     document.getElementById('fileInfo').style.display = 'none';
     document.getElementById('uploadError').style.display = 'none';
     document.getElementById('uploadBtn').style.display = 'none';
+    document.getElementById('pdfViewerSection').style.display = 'none';
+    currentFile = null;
+    
+    // Reset PDF viewer state
+    pdfDoc = null;
+    pageNum = 1;
+    scale = 1.2;
+    selectedText = '';
+    clearAllMappings();
 }
 
 function switchToManual() {

@@ -409,6 +409,386 @@
 }
 
 /* =================================
+   PDF VIEWER COMPONENT
+   ================================= */
+
+.pdf-viewer-section {
+    margin-top: 3rem;
+    padding: 2rem;
+    background: var(--surface-color);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(52, 58, 64, 0.12);
+    border: 1px solid var(--border-light);
+}
+
+.pdf-viewer-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.pdf-viewer-header h4 {
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.pdf-viewer-container {
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.pdf-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--gray-50);
+    border-bottom: 1px solid var(--border-light);
+}
+
+.page-info {
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin: 0 1rem;
+}
+
+.zoom-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.zoom-level {
+    min-width: 60px;
+    text-align: center;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.pdf-canvas-container {
+    position: relative;
+    overflow: auto;
+    max-height: 70vh;
+    background: #f8f9fa;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+#pdfCanvas {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    border-radius: 8px;
+    background: white;
+    border: 1px solid var(--border-light);
+}
+
+.text-layer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    opacity: 1;
+    line-height: 1.0;
+    pointer-events: auto;
+}
+
+.pdf-text-item {
+    color: transparent;
+    position: absolute;
+    white-space: nowrap;
+    cursor: text;
+    transform-origin: 0% 0%;
+    user-select: text;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+}
+
+.pdf-text-item::selection {
+    background: rgba(74, 157, 168, 0.4);
+    color: transparent;
+}
+
+.pdf-text-item::-moz-selection {
+    background: rgba(74, 157, 168, 0.4);
+    color: transparent;
+}
+
+.field-mapping-panel {
+    background: var(--gray-50);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-light);
+}
+
+.field-mapping-panel h6 {
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.mapping-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.mapping-btn {
+    font-size: 0.875rem;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.mapping-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(74, 157, 168, 0.25);
+}
+
+.mapping-btn.btn-glow {
+    animation: pulse-glow 1s ease-in-out infinite alternate;
+    border-color: var(--clearshift-orange) !important;
+    color: var(--clearshift-orange) !important;
+}
+
+@keyframes pulse-glow {
+    from {
+        box-shadow: 0 0 5px rgba(247, 148, 29, 0.5);
+    }
+    to {
+        box-shadow: 0 0 15px rgba(247, 148, 29, 0.8);
+    }
+}
+
+.selected-text-display {
+    background: white;
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-light);
+    font-family: 'Courier New', monospace;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    min-height: 2.5rem;
+    overflow-wrap: break-word;
+}
+
+.mapped-values-display {
+    background: white;
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-light);
+    font-size: 0.875rem;
+}
+
+.mapped-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.25rem 0;
+    border-bottom: 1px solid var(--gray-100);
+    font-size: 0.875rem;
+}
+
+.mapped-item:last-child {
+    border-bottom: none;
+}
+
+.mapped-item span {
+    font-weight: 500;
+    color: var(--clearshift-teal);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.action-buttons .btn {
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+    border-radius: 8px;
+}
+
+/* PDF TEXT SELECTION TOOLTIP */
+.selection-tooltip {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-light);
+    min-width: 300px;
+    max-width: 350px;
+    z-index: 9999;
+    animation: tooltipFadeIn 0.2s ease-out;
+}
+
+.tooltip-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border-light);
+    background: var(--gray-50);
+    border-radius: 12px 12px 0 0;
+}
+
+.selected-text-preview {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    flex: 1;
+    margin-right: 0.5rem;
+}
+
+.tooltip-close {
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.tooltip-close:hover {
+    background: var(--gray-200);
+    color: var(--text-primary);
+}
+
+.tooltip-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    padding: 1rem;
+}
+
+.tooltip-btn {
+    background: var(--surface-color);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    padding: 0.75rem 0.5rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    min-height: 60px;
+}
+
+.tooltip-btn:hover {
+    background: var(--clearshift-teal);
+    color: white;
+    border-color: var(--clearshift-teal);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(74, 157, 168, 0.3);
+}
+
+.tooltip-btn i {
+    font-size: 1.1rem;
+}
+
+@keyframes tooltipFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* MAPPING SUCCESS TOAST */
+.mapping-success-toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--success-color);
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    z-index: 10000;
+    transform: translateX(100%);
+    opacity: 0;
+    transition: all 0.3s ease;
+    max-width: 350px;
+}
+
+.mapping-success-toast.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.mapping-success-toast i {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.mapping-success-toast span {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Responsive design for PDF viewer */
+@media (max-width: 768px) {
+    .pdf-viewer-section {
+        margin-top: 2rem;
+        padding: 1rem;
+    }
+    
+    .pdf-controls {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .zoom-controls {
+        margin-top: 0.5rem;
+    }
+    
+    .mapping-buttons {
+        justify-content: center;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .action-buttons .btn {
+        width: 100%;
+        max-width: 200px;
+    }
+    
+    .pdf-canvas-container {
+        max-height: 50vh;
+        padding: 0.5rem;
+    }
+}
+
+/* =================================
    RESPONSIVE ADJUSTMENTS
    ================================= */
 
