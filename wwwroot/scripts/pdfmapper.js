@@ -41,15 +41,18 @@ container.addEventListener('mouseup', () => {
         const rect = range.getBoundingClientRect();
         const pageElement = range.startContainer.parentElement.closest('div');
         const pageNumber = Array.from(container.children).indexOf(pageElement) + 1;
+        const pageRect = pageElement.getBoundingClientRect();
         selections.push({
             page: pageNumber,
-            x: rect.x,
-            y: rect.y,
+            x: rect.left - pageRect.left,
+            y: rect.top - pageRect.top,
             width: rect.width,
             height: rect.height,
             text: selection.toString()
         });
-        range.surroundContents(document.createElement('mark'));
+        const mark = document.createElement('mark');
+        mark.style.backgroundColor = 'yellow';
+        range.surroundContents(mark);
         const field = prompt('Map to field (amount/date/currency/etc):');
         if(field) {
             selections[selections.length-1].field = field;

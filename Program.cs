@@ -18,9 +18,15 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
+    // Only redirect to HTTPS in production where an HTTPS port is configured.
+    app.UseHttpsRedirection();
 }
 
-app.UseHttpsRedirection();
+if (app.Environment.IsDevelopment())
+{
+    // In development the app often runs without HTTPS. Avoid a runtime warning
+    // about missing HTTPS port by skipping UseHttpsRedirection here.
+}
 app.UseRouting();
 app.UseAuthorization();
 
