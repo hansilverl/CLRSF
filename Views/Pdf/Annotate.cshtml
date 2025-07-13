@@ -1,0 +1,12 @@
+@{
+    ViewData["Title"] = "Annotate PDF";
+    var fileName = ViewData["FileName"] as string ?? string.Empty;
+}
+<link rel="stylesheet" href="~/lib/pdfjs/pdf_viewer.min.css" />
+<div id="viewerContainer" class="pdfViewer"></div>
+<button id="saveSelectionBtn">Save Selections</button>
+<script src="~/lib/pdfjs/pdf.min.js"></script>
+<script src="~/scripts/pdfmapper.js"></script>
+<script>
+    window.pdfFile = '@Url.Content($"~/uploads/{fileName}")';
+</script>
