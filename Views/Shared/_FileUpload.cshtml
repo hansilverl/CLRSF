@@ -75,90 +75,201 @@
         </p>
     </div>
     
-    <!-- PDF Viewer Section -->
-    <div id="pdfViewerSection" class="pdf-viewer-section" style="display: none;">
-        <div class="pdf-viewer-header">
-            <h4><i class="bi bi-file-earmark-pdf me-2"></i>PDF Statement Viewer</h4>
-            <p class="text-muted">Select text from the PDF to populate form fields automatically</p>
-        </div>
-        
-        <div class="pdf-viewer-container">
-            <div class="pdf-controls">
-                <button type="button" class="btn btn-sm btn-outline-secondary" id="prevPage">
-                    <i class="bi bi-chevron-left"></i> Previous
-                </button>
-                <span class="page-info">
-                    Page <span id="pageNum">1</span> of <span id="pageCount">0</span>
-                </span>
-                <button type="button" class="btn btn-sm btn-outline-secondary" id="nextPage">
-                    <i class="bi bi-chevron-right"></i> Next
-                </button>
-                <div class="zoom-controls ms-3">
-                    <button type="button" class="btn btn-sm btn-outline-secondary" id="zoomOut">
-                        <i class="bi bi-zoom-out"></i>
-                    </button>
-                    <span class="zoom-level">100%</span>
-                    <button type="button" class="btn btn-sm btn-outline-secondary" id="zoomIn">
-                        <i class="bi bi-zoom-in"></i>
-                    </button>
-                </div>
-            </div>
-            
-            <div class="pdf-content-container">
-                <div id="pdfTextContent" class="pdf-text-content"></div>
-            </div>
-        </div>
-        
-        <div class="field-mapping-panel">
-            <h6>Field Mapping</h6>
-            <p class="small text-muted">Select text in the PDF above, then click a button below to map it to the corresponding field:</p>
-            <div class="mapping-buttons">
-                <button type="button" class="btn btn-sm btn-outline-primary mapping-btn" data-field="date">
-                    <i class="bi bi-calendar me-1"></i>Date
-                </button>
-                <button type="button" class="btn btn-sm btn-outline-primary mapping-btn" data-field="amount">
-                    <i class="bi bi-currency-dollar me-1"></i>Amount
-                </button>
-                <button type="button" class="btn btn-sm btn-outline-primary mapping-btn" data-field="sourceCurrency">
-                    <i class="bi bi-arrow-right me-1"></i>From Currency
-                </button>
-                <button type="button" class="btn btn-sm btn-outline-primary mapping-btn" data-field="targetCurrency">
-                    <i class="bi bi-arrow-left me-1"></i>To Currency
-                </button>
-                <button type="button" class="btn btn-sm btn-outline-primary mapping-btn" data-field="bankRate">
-                    <i class="bi bi-percent me-1"></i>Bank Rate
-                </button>
-                <button type="button" class="btn btn-sm btn-outline-primary mapping-btn" data-field="fees">
-                    <i class="bi bi-receipt me-1"></i>Fees
+    <!-- PDF Selector Overlay -->
+    <div id="pdfSelectorOverlay" class="pdf-selector-overlay">
+        <div class="pdf-selector-container">
+            <!-- Header -->
+            <div class="pdf-selector-header">
+                <h2 class="pdf-selector-title">
+                    <i class="bi bi-file-earmark-pdf"></i>
+                    Bank Statement Field Mapper
+                </h2>
+                <button type="button" class="pdf-close-btn" id="closePdfSelector">
+                    <i class="bi bi-x"></i>
                 </button>
             </div>
             
-            <div class="mapped-values mt-3">
-                <div class="row">
-                    <div class="col-md-6">
-                        <small class="text-muted">Selected Text:</small>
-                        <div id="selectedText" class="selected-text-display">No text selected</div>
+            <!-- Main Content -->
+            <div class="pdf-selector-content">
+                <!-- PDF Viewer Panel -->
+                <div class="pdf-viewer-panel">
+                    <!-- PDF Controls -->
+                    <div class="pdf-controls">
+                        <div class="pdf-nav-controls">
+                            <button type="button" class="pdf-control-btn" id="prevPage" title="Previous Page">
+                                <i class="bi bi-chevron-left"></i>
+                            </button>
+                            <div class="page-display">
+                                Page <span id="pageNum">1</span> of <span id="pageCount">0</span>
+                            </div>
+                            <button type="button" class="pdf-control-btn" id="nextPage" title="Next Page">
+                                <i class="bi bi-chevron-right"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="zoom-controls">
+                            <button type="button" class="pdf-control-btn" id="zoomOut" title="Zoom Out">
+                                <i class="bi bi-zoom-out"></i>
+                            </button>
+                            <div class="zoom-level">100%</div>
+                            <button type="button" class="pdf-control-btn" id="zoomIn" title="Zoom In">
+                                <i class="bi bi-zoom-in"></i>
+                            </button>
+                        </div>
                     </div>
-                    <div class="col-md-6">
-                        <small class="text-muted">Mapped Values:</small>
-                        <div id="mappedValues" class="mapped-values-display">
-                            <div class="mapped-item">Date: <span id="mappedDate">-</span></div>
-                            <div class="mapped-item">Amount: <span id="mappedAmount">-</span></div>
-                            <div class="mapped-item">From: <span id="mappedSourceCurrency">-</span></div>
-                            <div class="mapped-item">To: <span id="mappedTargetCurrency">-</span></div>
-                            <div class="mapped-item">Rate: <span id="mappedBankRate">-</span></div>
-                            <div class="mapped-item">Fees: <span id="mappedFees">-</span></div>
+                    
+                    <!-- PDF Content -->
+                    <div class="pdf-content-wrapper">
+                        <div class="pdf-loading" id="pdfLoading">
+                            <div class="spinner"></div>
+                            <div>Loading PDF...</div>
+                        </div>
+                        <div class="pdf-page-container" style="display: none;" id="pdfPageContainer">
+                            <div id="pdfTextContent" class="pdf-text-content"></div>
                         </div>
                     </div>
                 </div>
                 
-                <div class="action-buttons mt-3">
-                    <button type="button" class="btn btn-success" id="applyMappedValues">
-                        <i class="bi bi-check-circle me-2"></i>Apply to Form
-                    </button>
-                    <button type="button" class="btn btn-outline-secondary" id="clearMappings">
-                        <i class="bi bi-x-circle me-2"></i>Clear All
-                    </button>
+                <!-- Field Mapping Panel -->
+                <div class="field-mapping-panel">
+                    <!-- Mapping Header -->
+                    <div class="mapping-header">
+                        <h3 class="mapping-title">
+                            <i class="bi bi-diagram-3"></i>
+                            Field Mapping
+                        </h3>
+                        <p class="mapping-subtitle">
+                            Select text from the PDF, then click a field below to map the values automatically.
+                        </p>
+                    </div>
+                    
+                    <!-- Selected Text Display -->
+                    <div class="selected-text-section">
+                        <div class="selected-text-label">
+                            <i class="bi bi-cursor-text"></i>
+                            Selected Text
+                        </div>
+                        <div id="selectedText" class="selected-text-display">
+                            Click on words or drag to select text from the PDF
+                        </div>
+                    </div>
+                    
+                    <!-- Unified Field Mapping Section -->
+                    <div class="mapping-fields-section">
+                        <h4 class="mapping-fields-title">
+                            <i class="bi bi-check2-square"></i>
+                            Transaction Fields
+                        </h4>
+                        <div class="mapping-fields-list">
+                            <div class="mapping-field-item" data-field="date" title="Click to map selected text to transaction date">
+                                <div class="field-header">
+                                    <div class="field-label">
+                                        <i class="bi bi-calendar-event field-icon"></i>
+                                        Transaction Date
+                                    </div>
+                                    <div class="field-status empty">Empty</div>
+                                </div>
+                                <div class="field-content">
+                                    <div class="field-value" id="mappedDate">Click to map selected text</div>
+                                </div>
+                                <button type="button" class="field-clear-btn" onclick="clearSingleField('date')" title="Clear this field">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="mapping-field-item" data-field="amount" title="Click to map selected text to transaction amount">
+                                <div class="field-header">
+                                    <div class="field-label">
+                                        <i class="bi bi-currency-dollar field-icon"></i>
+                                        Amount
+                                    </div>
+                                    <div class="field-status empty">Empty</div>
+                                </div>
+                                <div class="field-content">
+                                    <div class="field-value" id="mappedAmount">Click to map selected text</div>
+                                </div>
+                                <button type="button" class="field-clear-btn" onclick="clearSingleField('amount')" title="Clear this field">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="mapping-field-item" data-field="sourceCurrency" title="Click to map selected text to source currency">
+                                <div class="field-header">
+                                    <div class="field-label">
+                                        <i class="bi bi-arrow-right-circle field-icon"></i>
+                                        From Currency
+                                    </div>
+                                    <div class="field-status empty">Empty</div>
+                                </div>
+                                <div class="field-content">
+                                    <div class="field-value" id="mappedSourceCurrency">Click to map selected text</div>
+                                </div>
+                                <button type="button" class="field-clear-btn" onclick="clearSingleField('sourceCurrency')" title="Clear this field">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="mapping-field-item" data-field="targetCurrency" title="Click to map selected text to target currency">
+                                <div class="field-header">
+                                    <div class="field-label">
+                                        <i class="bi bi-arrow-left-circle field-icon"></i>
+                                        To Currency
+                                    </div>
+                                    <div class="field-status empty">Empty</div>
+                                </div>
+                                <div class="field-content">
+                                    <div class="field-value" id="mappedTargetCurrency">Click to map selected text</div>
+                                </div>
+                                <button type="button" class="field-clear-btn" onclick="clearSingleField('targetCurrency')" title="Clear this field">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="mapping-field-item" data-field="bankRate" title="Click to map selected text to exchange rate">
+                                <div class="field-header">
+                                    <div class="field-label">
+                                        <i class="bi bi-percent field-icon"></i>
+                                        Exchange Rate
+                                    </div>
+                                    <div class="field-status empty">Empty</div>
+                                </div>
+                                <div class="field-content">
+                                    <div class="field-value" id="mappedBankRate">Click to map selected text</div>
+                                </div>
+                                <button type="button" class="field-clear-btn" onclick="clearSingleField('bankRate')" title="Clear this field">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="mapping-field-item" data-field="fees" title="Click to map selected text to transaction fees">
+                                <div class="field-header">
+                                    <div class="field-label">
+                                        <i class="bi bi-receipt field-icon"></i>
+                                        Transaction Fees
+                                    </div>
+                                    <div class="field-status empty">Empty</div>
+                                </div>
+                                <div class="field-content">
+                                    <div class="field-value" id="mappedFees">Click to map selected text</div>
+                                </div>
+                                <button type="button" class="field-clear-btn" onclick="clearSingleField('fees')" title="Clear this field">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="mapping-actions">
+                        <button type="button" class="action-btn action-btn-primary" id="applyMappedValues" disabled>
+                            <i class="bi bi-check-circle"></i>
+                            Apply to Form
+                        </button>
+                        <button type="button" class="action-btn action-btn-secondary" id="clearMappings">
+                            <i class="bi bi-arrow-clockwise"></i>
+                            Clear All
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -215,14 +326,51 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('zoomIn')?.addEventListener('click', zoomIn);
     document.getElementById('zoomOut')?.addEventListener('click', zoomOut);
     
-    // Field mapping buttons
-    document.querySelectorAll('.mapping-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+    // PDF Selector Overlay controls
+    document.getElementById('closePdfSelector')?.addEventListener('click', hidePdfSelectorOverlay);
+    
+    // Close overlay when clicking outside
+    document.getElementById('pdfSelectorOverlay')?.addEventListener('click', function(e) {
+        if (e.target === this) {
+            hidePdfSelectorOverlay();
+        }
+    });
+    
+    // Escape key to close overlay
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && document.getElementById('pdfSelectorOverlay').classList.contains('active')) {
+            hidePdfSelectorOverlay();
+        }
+    });
+    
+    // Field mapping buttons - Updated for new unified interface
+    document.querySelectorAll('.mapping-field-item').forEach(item => {
+        item.addEventListener('click', function() {
             const field = this.dataset.field;
-            if (selectedText) {
-                mapFieldValue(field, selectedText);
+            if (selectedText && selectedText.trim()) {
+                // Remove active state from all items
+                document.querySelectorAll('.mapping-field-item').forEach(i => i.classList.remove('active'));
+                // Add active state to clicked item
+                this.classList.add('active');
+                
+                // Map the field value
+                mapFieldValue(field, selectedText.trim());
+                
+                // Remove active state after a short delay
+                setTimeout(() => {
+                    this.classList.remove('active');
+                }, 500);
             } else {
-                alert('Please select text from the PDF first');
+                // Show helpful message
+                const selectedTextDiv = document.getElementById('selectedText');
+                selectedTextDiv.innerHTML = '<span style="color: var(--warning-color);"><i class="bi bi-exclamation-circle"></i> Please select text from the PDF first</span>';
+                selectedTextDiv.classList.add('scale-in');
+                setTimeout(() => {
+                    selectedTextDiv.classList.remove('scale-in');
+                    if (!selectedText) {
+                        selectedTextDiv.innerHTML = 'Click on words or drag to select text from the PDF';
+                    }
+                }, 2000);
             }
         });
     });
@@ -247,18 +395,12 @@ function processFile() {
     uploadBtn.disabled = true;
     
     if (fileName.endsWith('.pdf')) {
-        // Show PDF viewer and load the PDF
-        document.getElementById('pdfViewerSection').style.display = 'block';
+        // Show PDF selector overlay and load the PDF
+        showPdfSelectorOverlay();
         loadPDF(currentFile);
         
-        // Scroll to PDF viewer after a short delay
+        // Reset button state
         setTimeout(() => {
-            document.getElementById('pdfViewerSection').scrollIntoView({ 
-                behavior: 'smooth',
-                block: 'start'
-            });
-            
-            // Reset button state
             uploadBtn.innerHTML = '<i class="bi bi-upload me-2"></i>Process File';
             uploadBtn.disabled = false;
         }, 500);
@@ -272,9 +414,36 @@ function processFile() {
     }
 }
 
+// Show PDF selector overlay
+function showPdfSelectorOverlay() {
+    const overlay = document.getElementById('pdfSelectorOverlay');
+    overlay.style.display = 'flex';
+    // Trigger reflow
+    overlay.offsetHeight;
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+// Hide PDF selector overlay
+function hidePdfSelectorOverlay() {
+    const overlay = document.getElementById('pdfSelectorOverlay');
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+    setTimeout(() => {
+        overlay.style.display = 'none';
+    }, 300);
+}
+
 // Load PDF function
 function loadPDF(file) {
     const fileReader = new FileReader();
+    const loadingDiv = document.getElementById('pdfLoading');
+    const pageContainer = document.getElementById('pdfPageContainer');
+    
+    // Show loading state
+    loadingDiv.style.display = 'flex';
+    pageContainer.style.display = 'none';
+    
     fileReader.onload = function() {
         const typedarray = new Uint8Array(this.result);
         
@@ -282,14 +451,30 @@ function loadPDF(file) {
             pdfDoc = pdf;
             document.getElementById('pageCount').textContent = pdf.numPages;
             
+            // Hide loading and show content
+            loadingDiv.style.display = 'none';
+            pageContainer.style.display = 'block';
+            
             // Render the first page
             renderPage(pageNum);
+            updatePdfControls();
         }).catch(function(error) {
             console.error('Error loading PDF:', error);
-            alert('Error loading PDF file. Please try a different file.');
+            loadingDiv.innerHTML = '<div class="text-danger"><i class="bi bi-exclamation-triangle"></i><br>Error loading PDF</div>';
         });
     };
     fileReader.readAsArrayBuffer(file);
+}
+
+// Update PDF controls state
+function updatePdfControls() {
+    const prevBtn = document.getElementById('prevPage');
+    const nextBtn = document.getElementById('nextPage');
+    const zoomLevel = document.querySelector('.zoom-level');
+    
+    if (prevBtn) prevBtn.disabled = (pageNum <= 1);
+    if (nextBtn) nextBtn.disabled = (pageNum >= pdfDoc.numPages);
+    if (zoomLevel) zoomLevel.textContent = Math.round(scale * 100) + '%';
 }
 
 // Render page function
@@ -317,7 +502,7 @@ function renderPage(num) {
     document.getElementById('pageNum').textContent = num;
 }
 
-// Render text content as visible, selectable text
+// Render text content as visible, selectable text with click-to-select words
 function renderTextContent(textContent, viewport) {
     const textContainer = document.getElementById('pdfTextContent');
     textContainer.innerHTML = '';
@@ -352,14 +537,34 @@ function renderTextContent(textContent, viewport) {
         
         // Add all text items in this line
         line.items.forEach(function(textItem, itemIndex) {
-            const textSpan = document.createElement('span');
-            textSpan.className = 'pdf-text-item';
-            textSpan.textContent = textItem.str;
-            textSpan.style.marginRight = (textItem.spaceAfter || 0) + 'px';
-            textSpan.style.fontWeight = textItem.fontName && textItem.fontName.includes('Bold') ? 'bold' : 'normal';
-            textSpan.style.fontStyle = textItem.fontName && textItem.fontName.includes('Italic') ? 'italic' : 'normal';
+            const textContent = textItem.str;
+            // Split by spaces and dashes, but keep separators
+            const words = textContent.split(/(\s+|-)/); // Split by spaces and dashes but keep them
             
-            lineDiv.appendChild(textSpan);
+            words.forEach(function(word, wordIndex) {
+                if (word.trim() && !word.match(/^\s+$/) && word !== '-') {
+                    // Create clickable word spans for actual words
+                    const wordSpan = document.createElement('span');
+                    wordSpan.className = 'pdf-text-item word-selectable';
+                    wordSpan.textContent = word;
+                    wordSpan.style.fontWeight = textItem.fontName && textItem.fontName.includes('Bold') ? 'bold' : 'normal';
+                    wordSpan.style.fontStyle = textItem.fontName && textItem.fontName.includes('Italic') ? 'italic' : 'normal';
+                    
+                    // Add click handler for word selection
+                    wordSpan.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        selectWord(this);
+                    });
+                    
+                    lineDiv.appendChild(wordSpan);
+                } else if (word) {
+                    // Add spaces and dashes as non-selectable text
+                    const separatorSpan = document.createElement('span');
+                    separatorSpan.className = 'pdf-text-separator';
+                    separatorSpan.textContent = word;
+                    lineDiv.appendChild(separatorSpan);
+                }
+            });
         });
         
         textContainer.appendChild(lineDiv);
@@ -368,9 +573,46 @@ function renderTextContent(textContent, viewport) {
     // Remove any existing selection tooltip
     removeSelectionTooltip();
     
-    // Add selection listener
+    // Add selection listeners for drag selection
     textContainer.addEventListener('mouseup', handleTextSelection);
     document.addEventListener('mouseup', hideTooltipOnOutsideClick);
+}
+
+// Handle word selection by click
+function selectWord(wordElement) {
+    // Clear any existing selections
+    clearWordSelections();
+    
+    // Mark this word as selected
+    wordElement.classList.add('word-selected');
+    
+    // Update selected text
+    selectedText = wordElement.textContent.trim();
+    updateSelectedTextDisplay();
+}
+
+// Clear all word selections
+function clearWordSelections() {
+    document.querySelectorAll('.word-selected').forEach(el => {
+        el.classList.remove('word-selected');
+    });
+}
+
+// Update selected text display
+function updateSelectedTextDisplay() {
+    const selectedTextDiv = document.getElementById('selectedText');
+    
+    if (selectedText && selectedText.trim()) {
+        selectedTextDiv.textContent = selectedText;
+        selectedTextDiv.classList.add('has-text', 'fade-in');
+    } else {
+        selectedTextDiv.textContent = 'Click on words or drag to select text from the PDF';
+        selectedTextDiv.classList.remove('has-text');
+    }
+    
+    setTimeout(() => {
+        selectedTextDiv.classList.remove('fade-in');
+    }, 300);
 }
 
 // Group text items into lines for better rendering
@@ -581,42 +823,77 @@ function queueRenderPage(num) {
 // Zoom functions
 function zoomIn() {
     scale += 0.2;
-    document.querySelector('.zoom-level').textContent = Math.round(scale * 100) + '%';
+    if (scale > 3.0) scale = 3.0; // Maximum zoom
+    updatePdfControls();
     renderPage(pageNum);
 }
 
 function zoomOut() {
-    if (scale <= 0.4) return;
     scale -= 0.2;
-    document.querySelector('.zoom-level').textContent = Math.round(scale * 100) + '%';
+    if (scale < 0.4) scale = 0.4; // Minimum zoom
+    updatePdfControls();
     renderPage(pageNum);
 }
 
-// Field mapping functions
-function mapFieldValue(field, value) {
+// Legacy field mapping function (kept for compatibility)
+function mapFieldValueLegacy(field, value) {
     mappedFields[field] = value;
-    document.getElementById('mapped' + field.charAt(0).toUpperCase() + field.slice(1)).textContent = value;
+    const mappedElement = document.getElementById('mapped' + field.charAt(0).toUpperCase() + field.slice(1));
+    if (mappedElement) {
+        mappedElement.textContent = value;
+    }
     
     // Clear selection
     window.getSelection().removeAllRanges();
     selectedText = '';
-    document.getElementById('selectedText').textContent = 'No text selected';
+    const selectedTextDiv = document.getElementById('selectedText');
+    if (selectedTextDiv) {
+        selectedTextDiv.textContent = 'Click and drag to select text from the PDF';
+        selectedTextDiv.classList.remove('has-text');
+    }
 }
 
-function clearAllMappings() {
+// Legacy clear mappings function (kept for compatibility)
+function clearAllMappingsLegacy() {
     Object.keys(mappedFields).forEach(field => {
         mappedFields[field] = '';
-        document.getElementById('mapped' + field.charAt(0).toUpperCase() + field.slice(1)).textContent = '-';
+        const mappedElement = document.getElementById('mapped' + field.charAt(0).toUpperCase() + field.slice(1));
+        if (mappedElement) {
+            mappedElement.textContent = '-';
+        }
     });
-    document.getElementById('selectedText').textContent = 'No text selected';
+    const selectedTextDiv = document.getElementById('selectedText');
+    if (selectedTextDiv) {
+        selectedTextDiv.textContent = 'Click and drag to select text from the PDF';
+        selectedTextDiv.classList.remove('has-text');
+    }
     selectedText = '';
+}
+
+// Remove selection tooltip
+function removeSelectionTooltip() {
+    const existingTooltip = document.querySelector('.selection-tooltip');
+    if (existingTooltip) {
+        existingTooltip.remove();
+    }
+}
+
+// Hide tooltip when clicking outside
+function hideTooltipOnOutsideClick(event) {
+    const tooltip = document.querySelector('.selection-tooltip');
+    if (tooltip && !tooltip.contains(event.target)) {
+        removeSelectionTooltip();
+    }
 }
 
 function applyMappedValuesToForm() {
     // Switch to manual tab
     switchToManual();
     
-    // Apply mapped values to form fields
+    // Hide the PDF overlay
+    hidePdfSelectorOverlay();
+    
+    // Apply mapped values to form fields after a short delay
     setTimeout(() => {
         if (mappedFields.date) {
             const dateField = document.querySelector('input[name="Date"]');
@@ -842,7 +1119,7 @@ function removeFile() {
     document.getElementById('fileInfo').style.display = 'none';
     document.getElementById('uploadError').style.display = 'none';
     document.getElementById('uploadBtn').style.display = 'none';
-    document.getElementById('pdfViewerSection').style.display = 'none';
+    hidePdfSelectorOverlay();
     currentFile = null;
     
     // Reset PDF viewer state
@@ -851,6 +1128,210 @@ function removeFile() {
     scale = 1.2;
     selectedText = '';
     clearAllMappings();
+}
+
+// Text selection handler for drag selection
+function handleTextSelection() {
+    const selection = window.getSelection();
+    const newSelectedText = selection.toString().trim();
+    
+    if (newSelectedText && newSelectedText !== selectedText) {
+        // Clear word selections when using drag selection
+        clearWordSelections();
+        
+        selectedText = newSelectedText;
+        updateSelectedTextDisplay();
+        
+        // Highlight the selected text in the PDF
+        highlightSelectedText(selection);
+    } else if (!newSelectedText) {
+        // Only clear if there's no word selection either
+        const hasWordSelection = document.querySelector('.word-selected');
+        if (!hasWordSelection) {
+            selectedText = '';
+            updateSelectedTextDisplay();
+            removeHighlights();
+        }
+    }
+}
+
+// Highlight selected text in PDF
+function highlightSelectedText(selection) {
+    removeHighlights();
+    
+    if (selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        const span = document.createElement('span');
+        span.className = 'highlighted';
+        
+        try {
+            range.surroundContents(span);
+        } catch (e) {
+            // If can't surround contents, create a new span
+            span.textContent = range.toString();
+            range.deleteContents();
+            range.insertNode(span);
+        }
+    }
+}
+
+// Remove highlights
+function removeHighlights() {
+    document.querySelectorAll('.pdf-text-content .highlighted').forEach(el => {
+        const parent = el.parentNode;
+        parent.replaceChild(document.createTextNode(el.textContent), el);
+        parent.normalize();
+    });
+}
+
+// Map field value with new unified interface
+function mapFieldValue(field, value) {
+    let processedValue = value;
+    
+    // Process the value based on field type
+    switch (field) {
+        case 'date':
+            processedValue = processDateValue(value) || value;
+            break;
+        case 'amount':
+        case 'bankRate':
+        case 'fees':
+            const numericValue = extractNumericValue(value);
+            processedValue = numericValue !== null ? numericValue.toString() : value;
+            break;
+        case 'sourceCurrency':
+        case 'targetCurrency':
+            processedValue = extractCurrencyCode(value) || value;
+            break;
+    }
+    
+    // Store the mapped value
+    mappedFields[field] = processedValue;
+    
+    // Update the unified field display
+    const fieldElement = document.getElementById(`mapped${field.charAt(0).toUpperCase() + field.slice(1)}`);
+    const fieldItem = document.querySelector(`[data-field="${field}"].mapping-field-item`);
+    const fieldStatus = fieldItem?.querySelector('.field-status');
+    
+    if (fieldElement && fieldItem) {
+        fieldElement.textContent = processedValue;
+        fieldItem.classList.add('filled');
+        
+        if (fieldStatus) {
+            fieldStatus.textContent = 'Mapped';
+            fieldStatus.classList.remove('empty');
+            fieldStatus.classList.add('filled');
+        }
+    }
+    
+    // Update apply button state
+    updateApplyButtonState();
+    
+    // Show success feedback
+    showFieldMappedFeedback(field);
+    
+    // Clear selections after mapping
+    setTimeout(() => {
+        clearWordSelections();
+        selectedText = '';
+        updateSelectedTextDisplay();
+        removeHighlights();
+        window.getSelection().removeAllRanges();
+    }, 1000);
+}
+
+// Clear a single field
+function clearSingleField(field) {
+    mappedFields[field] = '';
+    
+    const fieldElement = document.getElementById(`mapped${field.charAt(0).toUpperCase() + field.slice(1)}`);
+    const fieldItem = document.querySelector(`[data-field="${field}"].mapping-field-item`);
+    const fieldStatus = fieldItem?.querySelector('.field-status');
+    
+    if (fieldElement && fieldItem) {
+        fieldElement.textContent = 'Click to map selected text';
+        fieldItem.classList.remove('filled', 'active');
+        
+        if (fieldStatus) {
+            fieldStatus.textContent = 'Empty';
+            fieldStatus.classList.remove('filled');
+            fieldStatus.classList.add('empty');
+        }
+    }
+    
+    updateApplyButtonState();
+}
+
+// Show field mapped feedback for unified interface
+function showFieldMappedFeedback(field) {
+    const fieldItem = document.querySelector(`[data-field="${field}"].mapping-field-item`);
+    if (fieldItem) {
+        const fieldLabel = fieldItem.querySelector('.field-label');
+        const originalHTML = fieldLabel.innerHTML;
+        
+        fieldLabel.innerHTML = '<i class="bi bi-check-circle field-icon" style="color: var(--success-color);"></i>Mapped Successfully!';
+        fieldItem.classList.add('scale-in');
+        
+        setTimeout(() => {
+            fieldLabel.innerHTML = originalHTML;
+            fieldItem.classList.remove('scale-in');
+        }, 1500);
+    }
+}
+
+// Update apply button state
+function updateApplyButtonState() {
+    const applyButton = document.getElementById('applyMappedValues');
+    const hasMappedValues = Object.values(mappedFields).some(value => value && value.trim());
+    
+    if (applyButton) {
+        applyButton.disabled = !hasMappedValues;
+        
+        if (hasMappedValues) {
+            applyButton.innerHTML = '<i class="bi bi-check-circle"></i>Apply to Form';
+        } else {
+            applyButton.innerHTML = '<i class="bi bi-check-circle"></i>Apply to Form';
+        }
+    }
+}
+
+// Clear all mappings with unified interface
+function clearAllMappings() {
+    // Reset mapped fields
+    Object.keys(mappedFields).forEach(field => {
+        mappedFields[field] = '';
+        
+        const fieldElement = document.getElementById(`mapped${field.charAt(0).toUpperCase() + field.slice(1)}`);
+        const fieldItem = document.querySelector(`[data-field="${field}"].mapping-field-item`);
+        const fieldStatus = fieldItem?.querySelector('.field-status');
+        
+        if (fieldElement && fieldItem) {
+            fieldElement.textContent = 'Click to map selected text';
+            fieldItem.classList.remove('filled', 'active');
+            
+            if (fieldStatus) {
+                fieldStatus.textContent = 'Empty';
+                fieldStatus.classList.remove('filled');
+                fieldStatus.classList.add('empty');
+            }
+        }
+    });
+    
+    // Clear selected text
+    selectedText = '';
+    const selectedTextDiv = document.getElementById('selectedText');
+    selectedTextDiv.textContent = 'Click on words or drag to select text from the PDF';
+    selectedTextDiv.classList.remove('has-text');
+    
+    // Remove highlights and word selections
+    removeHighlights();
+    clearWordSelections();
+    
+    // Update apply button
+    updateApplyButtonState();
+    
+    // Clear any text selection
+    window.getSelection().removeAllRanges();
 }
 
 function switchToManual() {
