@@ -23,7 +23,7 @@ namespace CurrencyComparisonTool.Models
         public decimal? CSFees { get; set; }
 
         [Required]
-        [Range(30000.0, double.MaxValue, ErrorMessage = "Enter an amount over 30K")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Amount must be positive")]
         public decimal Amount { get; set; }
 
         [Required]
@@ -44,9 +44,24 @@ namespace CurrencyComparisonTool.Models
             // Ensure BankFeesCurrency is set
             model.BankFeesCurrency ??= model.SourceCurrency;
 
-            // Calculate default fees as amounts based on 1.25% and 0.59% respectively
+            // Calculate default bank fee as 1.25% of amount
             var defaultBankFeeAmount = model.Amount * 0.0125m; // 1.25% of amount
-            var defaultCSFeeAmount = model.Amount * 0.0059m; // 0.59% of amount
+
+            // Calculate ClearShift fee: 0.59% or minimum fee (whichever is higher)
+            var percentageFee = model.Amount * 0.0059m; // 0.59% of amount
+            var minimumFee = CurrencyConstants.ClearShiftMinimumFees.TryGetValue(model.TargetCurrency, out var minFee) 
+                ? minFee 
+                : 25m; // Default minimum if currency not found
+            
+            // Convert minimum fee to source currency for comparison and calculation
+            var minimumFeeInSourceCurrency = minimumFee;
+            if (model.TargetCurrency != model.SourceCurrency)
+            {
+                // Convert minimum fee from target currency to source currency
+                minimumFeeInSourceCurrency = minimumFee / clearshiftRate;
+            }
+            
+            var defaultCSFeeAmount = Math.Max(percentageFee, minimumFeeInSourceCurrency);
 
             // Default fees if not supplied (as amounts in source currency)
             model.BankFees ??= defaultBankFeeAmount;

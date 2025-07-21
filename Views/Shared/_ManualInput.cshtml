@@ -13,7 +13,7 @@
                 <input asp-for="Amount" type="hidden" id="Amount" />
             </div>
             <span asp-validation-for="Amount" class="validation-error"></span>
-            <span id="AmountCustomError" class="validation-error" style="display:none;">Enter an amount over 30K</span>
+            <span id="AmountCustomError" class="validation-error" style="display:none;">Amount must be positive</span>
         </div>
 
         <div class="currency-pair-container">
@@ -135,7 +135,7 @@
                 amountHidden.value = raw;
                 // Hide error if valid, but don't show if invalid
                 const customError = document.getElementById('AmountCustomError');
-                if (parseFloat(raw) >= 30000 || raw === '') {
+                if (parseFloat(raw) > 0 || raw === '') {
                     customError.style.display = 'none';
                 }
             } else {
@@ -148,7 +148,7 @@
         amountDisplay.addEventListener('blur', function (e) {
             let raw = e.target.value.replace(/,/g, '');
             const customError = document.getElementById('AmountCustomError');
-            if (raw && parseFloat(raw) < 30000) {
+            if (raw && parseFloat(raw) <= 0) {
                 customError.style.display = '';
             } else {
                 customError.style.display = 'none';
