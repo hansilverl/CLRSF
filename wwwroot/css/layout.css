@@ -20,9 +20,10 @@
     background: white;
     border-radius: 16px;
     box-shadow: var(--card-shadow);
-    overflow: hidden;
+    overflow: visible;
     transition: var(--transition);
-    max-height: calc(100vh - 100px);
+    /* Remove max-height to allow content to expand */
+    max-height: none;
     display: flex;
     flex-direction: column;
     border-top: 3px solid var(--clearshift-teal);
@@ -76,19 +77,28 @@
 /* Tab Content */
 .tab-content {
     position: relative;
-    flex: 1;
-    overflow: hidden;
+    flex: 1 1 auto;
+    overflow: visible;
     display: flex;
     flex-direction: column;
 }
+
 
 .tab-pane {
     display: none;
     padding: 1.5rem;
     animation: fadeIn 0.3s ease-in-out;
-    flex: 1;
-    overflow-y: auto;
-    max-height: calc(100vh - 180px);
+    flex: 1 1 auto;
+    overflow: visible;
+    max-height: none;
+}
+
+/* Ensure upload tab always expands to fit content and never scrolls or clips */
+#upload-tab.tab-pane {
+    overflow: visible !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    height: auto !important;
 }
 
 .tab-pane.active {
