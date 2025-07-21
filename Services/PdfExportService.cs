@@ -224,12 +224,21 @@ namespace CurrencyComparisonTool.Services
             AddComparisonTableRow(table, "Exchange Rate:",
                 reportModel.BankRate.ToString("N4"),
                 reportModel.ClearShiftRate.ToString("N4"));
-            AddComparisonTableRow(table, $"Fees ({reportModel.BankFeesCurrency}):",
-                reportModel.BankFees.ToString("N2"),
-                reportModel.ClearShiftFees.ToString("N2"));
-            AddComparisonTableRow(table, $"Final Amount ({reportModel.TargetCurrency}):",
-                reportModel.BankConvertedAmount.ToString("N2"),
-                reportModel.ClearShiftConvertedAmount.ToString("N2"));
+            
+            // Get currency symbols for fees
+            var bankFeeSymbol = CurrencyConstants.CurrencySymbols.TryGetValue(reportModel.BankFeesCurrency, out var bankSymbol) ? bankSymbol : "";
+            var clearShiftFeeSymbol = CurrencyConstants.CurrencySymbols.TryGetValue(reportModel.SourceCurrency, out var csSymbol) ? csSymbol : "";
+            
+            AddComparisonTableRow(table, "Fees:",
+                $"{bankFeeSymbol}{reportModel.BankFees:N2}",
+                $"{clearShiftFeeSymbol}{reportModel.ClearShiftFees:N2}");
+            
+            // Get currency symbol for final amounts
+            var targetSymbol = CurrencyConstants.CurrencySymbols.TryGetValue(reportModel.TargetCurrency, out var tSymbol) ? tSymbol : "";
+            
+            AddComparisonTableRow(table, $"Final Amount:",
+                $"{targetSymbol}{reportModel.BankConvertedAmount:N2}",
+                $"{targetSymbol}{reportModel.ClearShiftConvertedAmount:N2}");
             // Add blank line after section
             var after = section.AddParagraph("");
             after.Format.SpaceBefore = Unit.FromPoint(2);
@@ -254,9 +263,12 @@ namespace CurrencyComparisonTool.Services
             cell.Format.SpaceAfter = Unit.FromPoint(10);
             cell.Borders.Width = 0;
 
+            // Get currency symbol for target currency
+            var targetSymbol = CurrencyConstants.CurrencySymbols.TryGetValue(reportModel.TargetCurrency, out var tSymbol) ? tSymbol : "";
+            
             var savingsText = reportModel.TotalSavings >= 0
-                ? $"Potential Savings with ClearShift: {reportModel.TotalSavings:N2} {reportModel.TargetCurrency}"
-                : $"Additional Cost with ClearShift: {Math.Abs(reportModel.TotalSavings):N2} {reportModel.TargetCurrency}";
+                ? $"Potential Savings with ClearShift: {targetSymbol}{reportModel.TotalSavings:N2}"
+                : $"Additional Cost with ClearShift: {targetSymbol}{Math.Abs(reportModel.TotalSavings):N2}";
             var percentageText = reportModel.SavingsPercentage >= 0
                 ? $"Savings Percentage: {reportModel.SavingsPercentage:N2}%"
                 : $"Additional Cost Percentage: {Math.Abs(reportModel.SavingsPercentage):N2}%";
