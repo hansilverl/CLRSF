@@ -88,7 +88,7 @@
             </label>
             <div class="fee-input-container">
                 <input asp-for="BankFees" type="number" step="0.01" class="form-control modern-input fee-amount-input"
-                    placeholder="1.25%" />
+                    placeholder="0.00" />
                 <select class="form-select fee-currency-select" id="BankFeesCurrency" onchange="updateBankFeesCurrency()">
                     <option value="@Model.SourceCurrency" selected="@(Model.BankFeesCurrency == Model.SourceCurrency || string.IsNullOrEmpty(Model.BankFeesCurrency))">@Model.SourceCurrency</option>
                     <option value="@Model.TargetCurrency" selected="@(Model.BankFeesCurrency == Model.TargetCurrency)">@Model.TargetCurrency</option>
