@@ -6,6 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Register encoding provider (for PdfSharp/MigraDoc)
 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<IExchangeRateService, BOIExchangeRateService>();

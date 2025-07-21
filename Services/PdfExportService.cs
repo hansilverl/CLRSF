@@ -224,9 +224,9 @@ namespace CurrencyComparisonTool.Services
             AddComparisonTableRow(table, "Exchange Rate:",
                 reportModel.BankRate.ToString("N4"),
                 reportModel.ClearShiftRate.ToString("N4"));
-            AddComparisonTableRow(table, "Fees (%):",
-                reportModel.BankFees.ToString("N2") + "%",
-                reportModel.ClearShiftFees.ToString("N2") + "%");
+            AddComparisonTableRow(table, $"Fees ({reportModel.BankFeesCurrency}):",
+                reportModel.BankFees.ToString("N2"),
+                reportModel.ClearShiftFees.ToString("N2"));
             AddComparisonTableRow(table, $"Final Amount ({reportModel.TargetCurrency}):",
                 reportModel.BankConvertedAmount.ToString("N2"),
                 reportModel.ClearShiftConvertedAmount.ToString("N2"));

@@ -19,6 +19,7 @@ namespace CurrencyComparisonTool.Models
         // Bank details
         public decimal BankRate { get; set; }
         public decimal BankFees { get; set; }
+        public string BankFeesCurrency { get; set; } = string.Empty;
         public decimal BankConvertedAmount { get; set; }
         
         // ClearShift details
@@ -49,6 +50,7 @@ namespace CurrencyComparisonTool.Models
                 TargetCurrency = model.TargetCurrency,
                 BankRate = model.BankRate,
                 BankFees = model.BankFees ?? 0,
+                BankFeesCurrency = model.BankFeesCurrency ?? model.SourceCurrency,
                 BankConvertedAmount = model.b_convertedAmount,
                 ClearShiftRate = clearShiftRate,
                 ClearShiftFees = model.CSFees ?? 0,

@@ -16,6 +16,10 @@ namespace CurrencyComparisonTool.Models
         [Range(0, double.MaxValue, ErrorMessage = "Bank Fees must be non-negative")]
         public decimal? BankFees { get; set; }
 
+   
+        public string BankFeesCurrency { get; set; } = "USD";
+
+        [Range(0, double.MaxValue, ErrorMessage = "ClearShift Fees must be non-negative")]
         public decimal? CSFees { get; set; }
 
         [Required]
@@ -32,29 +36,44 @@ namespace CurrencyComparisonTool.Models
         public decimal cs_convertedAmount { get; set; }
         public decimal Savings { get; set; }
 
+  
         public static CurrencyComparisonModel Calculate(CurrencyComparisonModel model, decimal clearshiftRate)
         {
             if (model == null) throw new ArgumentNullException(nameof(model));
 
-            const decimal DefaultBankFee = 1.25m;
-            const decimal DefaultCSFee = 0.59m; // Default fees in percent
+            // Ensure BankFeesCurrency is set
+            model.BankFeesCurrency ??= model.SourceCurrency;
 
-            // Default fees if not supplied
-            model.BankFees ??= DefaultBankFee;
-            model.CSFees ??= DefaultCSFee;
+            // Calculate default fees as amounts based on 1.25% and 0.59% respectively
+            var defaultBankFeeAmount = model.Amount * 0.0125m; // 1.25% of amount
+            var defaultCSFeeAmount = model.Amount * 0.0059m; // 0.59% of amount
+
+            // Default fees if not supplied (as amounts in source currency)
+            model.BankFees ??= defaultBankFeeAmount;
+            model.CSFees ??= defaultCSFeeAmount;
 
             // Ensure valid rates
             if (model.BankRate <= 0 || clearshiftRate <= 0)
                 throw new ArgumentException("Conversion rates must be positive.");
 
-            // Bank conversion
-            model.b_convertedAmount = Decimal.Round(
-                (model.Amount * model.BankRate) * (1 - (model.BankFees.Value / 100)), 4);
+            // Convert bank fees to source currency if they're in target currency
+            decimal bankFeesInSourceCurrency = model.BankFees.Value;
+            if (model.BankFeesCurrency == model.TargetCurrency)
+            {
+                // Convert from target currency to source currency
+                bankFeesInSourceCurrency = model.BankFees.Value / model.BankRate;
+            }
 
-            // ClearShift conversion
+            // Bank conversion - subtract fee from source amount before conversion
+            var bankAmountAfterFees = model.Amount - bankFeesInSourceCurrency;
+            model.b_convertedAmount = Decimal.Round(
+                bankAmountAfterFees * model.BankRate, 4);
+
+            // ClearShift conversion - subtract fee from source amount before conversion
+            var csAmountAfterFees = model.Amount - model.CSFees.Value;
             model.cs_convertedAmount = Decimal.Round(
-                // fee is taken Before conversion (from source amount)
-                (1 - (model.CSFees.Value / 100)) * model.Amount * clearshiftRate, 4);
+                csAmountAfterFees * clearshiftRate, 4);
+            
             // Savings
             model.Savings = Decimal.Round(
                 model.cs_convertedAmount - model.b_convertedAmount, 4);

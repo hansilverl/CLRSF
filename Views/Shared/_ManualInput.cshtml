@@ -83,13 +83,17 @@
 
         <div class="form-group">
             <label asp-for="BankFees" class="form-label">
-                <i class="bi bi-percent me-1"></i>
-                Bank Fees (%)
+                <i class="bi bi-cash me-1"></i>
+                Bank Fees
             </label>
-            <div class="input-group">
-                <input asp-for="BankFees" type="number" step="0.01" class="form-control modern-input"
-                    placeholder="1.25" />
-                <span class="input-group-text">%</span>
+            <div class="fee-input-container">
+                <input asp-for="BankFees" type="number" step="0.01" class="form-control modern-input fee-amount-input"
+                    placeholder="1.25%" />
+                <select class="form-select fee-currency-select" id="BankFeesCurrency" onchange="updateBankFeesCurrency()">
+                    <option value="@Model.SourceCurrency">@Model.SourceCurrency</option>
+                    <option value="@Model.TargetCurrency">@Model.TargetCurrency</option>
+                </select>
+                <input asp-for="BankFeesCurrency" type="hidden" id="BankFeesCurrencyHidden" />
             </div>
             <span asp-validation-for="BankFees" class="validation-error"></span>
         </div>
@@ -175,6 +179,7 @@
     function handleCurrencyChange() {
         const sourceDropdown = document.getElementById('SourceCurrency');
         const targetDropdown = document.getElementById('TargetCurrency');
+        const feesCurrencyDropdown = document.getElementById('BankFeesCurrency');
         const sourceValue = sourceDropdown.value;
         const targetValue = targetDropdown.value;
 
@@ -190,6 +195,43 @@
             } else {
                 targetDropdown.value = 'ILS';
             }
+        }
+
+        // Update fees currency dropdown with current currencies
+        if (feesCurrencyDropdown) {
+            const currentFeesCurrency = feesCurrencyDropdown.value;
+            feesCurrencyDropdown.innerHTML = '';
+            
+            // Add source currency option
+            const sourceOption = document.createElement('option');
+            sourceOption.value = sourceDropdown.value;
+            sourceOption.textContent = sourceDropdown.value;
+            feesCurrencyDropdown.appendChild(sourceOption);
+            
+            // Add target currency option
+            const targetOption = document.createElement('option');
+            targetOption.value = targetDropdown.value;
+            targetOption.textContent = targetDropdown.value;
+            feesCurrencyDropdown.appendChild(targetOption);
+            
+            // Try to maintain the previous selection if it's still valid
+            if (currentFeesCurrency === sourceDropdown.value || currentFeesCurrency === targetDropdown.value) {
+                feesCurrencyDropdown.value = currentFeesCurrency;
+            } else {
+                // Default to source currency
+                feesCurrencyDropdown.value = sourceDropdown.value;
+            }
+            
+            // Update the hidden field
+            updateBankFeesCurrency();
+        }
+    }
+
+    function updateBankFeesCurrency() {
+        const feesCurrencyDropdown = document.getElementById('BankFeesCurrency');
+        const hiddenField = document.getElementById('BankFeesCurrencyHidden');
+        if (feesCurrencyDropdown && hiddenField) {
+            hiddenField.value = feesCurrencyDropdown.value;
         }
     }
 
@@ -207,5 +249,6 @@
     // Initialize on page load
     document.addEventListener('DOMContentLoaded', function () {
         handleCurrencyChange();
+        updateBankFeesCurrency();
     });
 </script>

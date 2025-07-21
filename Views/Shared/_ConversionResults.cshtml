@@ -33,7 +33,7 @@
                                 </div>
                                 <div class="rate-details">
                                     <small class="text-muted">
-                                        Rate: @Model.BankRate | Fees: @(Model.BankFees?.ToString("0.##") ?? "1.25")%
+                                        Rate: @Model.BankRate | Fees: @CurrencyConstants.CurrencySymbols[Model.BankFeesCurrency ?? Model.SourceCurrency]@(Model.BankFees?.ToString("N2") ?? "Auto")
                                     </small>
                                 </div>
                             </div>
@@ -63,7 +63,7 @@
                                 </div>
                                 <div class="rate-details">
                                     <small class="text-muted">
-                                        Bank of Israel rate | Fees: @(Model.CSFees?.ToString("0.##") ?? "1.00")%
+                                        Bank of Israel rate | Fees: @CurrencyConstants.CurrencySymbols[Model.SourceCurrency]@(Model.CSFees?.ToString("N2") ?? "Auto")
                                     </small>
                                 </div>
                             </div>
@@ -134,10 +134,21 @@
             document.querySelector('input[name="Amount"]').value = '';
             document.querySelector('input[name="BankRate"]').value = '';
             document.querySelector('input[name="BankFees"]').value = '';
+            // Reset the display input for amount
+            const amountDisplay = document.getElementById('AmountDisplay');
+            if (amountDisplay) {
+                amountDisplay.value = '';
+            }
             // Scroll to top
             window.scrollTo({ top: 0, behavior: 'smooth' });
             // Focus on amount input
-            document.querySelector('input[name="Amount"]').focus();
+            setTimeout(() => {
+                if (amountDisplay) {
+                    amountDisplay.focus();
+                } else {
+                    document.querySelector('input[name="Amount"]').focus();
+                }
+            }, 100);
         }
 
         function exportReport() {
@@ -154,6 +165,7 @@
                 'TargetCurrency': '@Model.TargetCurrency',
                 'BankRate': '@Model.BankRate',
                 'BankFees': '@(Model.BankFees ?? 0)',
+                'BankFeesCurrency': '@(Model.BankFeesCurrency ?? Model.SourceCurrency)',
                 'CSFees': '@(Model.CSFees ?? 0)',
                 'b_convertedAmount': '@Model.b_convertedAmount',
                 'cs_convertedAmount': '@Model.cs_convertedAmount',
