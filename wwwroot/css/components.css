@@ -221,38 +221,70 @@
     font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-/* Fee Input Container */
+/* Fee Input Container - Connected styling */
 .fee-input-container {
     display: flex;
-    gap: 0.5rem;
+    gap: 0;
+    border: 1px solid #e5e7eb;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    transition: var(--transition);
+    background: white;
+}
+
+.fee-input-container:hover {
+    border-color: #d1d5db;
+}
+
+.fee-input-container:focus-within {
+    border-color: var(--clearshift-teal);
+    box-shadow: 0 0 0 2px rgba(74, 157, 168, 0.1);
 }
 
 .fee-amount-input {
     flex: 1;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 1rem 1.25rem;
+    font-size: 1.125rem;
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-weight: 400;
+    background: transparent;
+}
+
+.fee-amount-input:focus {
+    outline: none;
+    box-shadow: none !important;
+    border: none !important;
 }
 
 .fee-currency-select {
     width: 80px;
     padding: 1rem 0.75rem;
-    border: 1px solid #e5e7eb;
-    border-radius: var(--border-radius);
+    border: none !important;
+    border-left: 1px solid #e5e7eb !important;
+    border-radius: 0 !important;
     font-size: 1rem;
     font-weight: 600;
     color: var(--clearshift-blue);
-    background: white;
+    background: var(--clearshift-light-teal);
     font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    transition: var(--transition);
     cursor: pointer;
+    outline: none;
+    box-shadow: none !important;
+    text-align: center;
 }
 
 .fee-currency-select:hover {
-    border-color: #d1d5db;
+    background: rgba(74, 157, 168, 0.15);
 }
 
 .fee-currency-select:focus {
     outline: none;
-    border-color: var(--clearshift-teal);
-    box-shadow: 0 0 0 2px rgba(74, 157, 168, 0.1);
+    box-shadow: none !important;
+    border-left: 1px solid var(--clearshift-teal) !important;
+    background: rgba(74, 157, 168, 0.2);
 }
 
 /* Amount Section */
