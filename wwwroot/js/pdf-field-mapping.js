@@ -144,6 +144,17 @@ function initializePdfViewer() {
             return;
         }
         
+        // Clean up any existing instance
+        if (pdfViewer) {
+            console.log('Cleaning up existing PDF viewer instance...');
+            try {
+                pdfViewer.destroy();
+            } catch (destroyError) {
+                console.warn('Error destroying existing PDF viewer:', destroyError);
+            }
+            pdfViewer = null;
+        }
+        
         console.log('PDF.js version:', pdfjsLib.version);
         
         // Initialize the clean PDF viewer
@@ -152,6 +163,11 @@ function initializePdfViewer() {
         });
 
         console.log('PDF viewer initialized successfully');
+
+        // Verify the viewer was created properly
+        if (!pdfViewer || !pdfViewer.container) {
+            throw new Error('PDF viewer failed to initialize properly');
+        }
 
         // Listen for text selection events
         document.getElementById('nativePdfViewer').addEventListener('textSelected', function(event) {
@@ -221,8 +237,43 @@ function processFile() {
 async function loadPDFWithViewer(file) {
     console.log('loadPDFWithViewer called with file:', file);
     
+    // Ensure we have a fresh PDF viewer instance
     if (!pdfViewer) {
-        console.error('PDF viewer not initialized');
+        console.log('No PDF viewer instance found, reinitializing...');
+        try {
+            initializePdfViewer();
+            // Wait a moment for initialization to complete
+            await new Promise(resolve => setTimeout(resolve, 100));
+        } catch (error) {
+            console.error('Failed to reinitialize PDF viewer:', error);
+            alert('Failed to initialize PDF viewer. Please refresh the page and try again.');
+            return;
+        }
+    } else {
+        // If we have an existing viewer, try to reinitialize it to ensure clean state
+        console.log('Reinitializing existing PDF viewer for clean state...');
+        try {
+            // Clean way to reset the viewer - just reinitialize it
+            initializePdfViewer();
+            // Wait a moment for reinitialization to complete
+            await new Promise(resolve => setTimeout(resolve, 200));
+        } catch (error) {
+            console.warn('Error reinitializing PDF viewer, creating new instance:', error);
+            try {
+                pdfViewer.destroy();
+                pdfViewer = null;
+                initializePdfViewer();
+                await new Promise(resolve => setTimeout(resolve, 200));
+            } catch (fallbackError) {
+                console.error('Failed to create new PDF viewer instance:', fallbackError);
+                alert('Failed to initialize PDF viewer. Please refresh the page and try again.');
+                return;
+            }
+        }
+    }
+    
+    if (!pdfViewer) {
+        console.error('PDF viewer not initialized after reinitialize attempt');
         alert('PDF viewer not initialized. Please refresh the page and try again.');
         return;
     }
@@ -277,6 +328,13 @@ function hidePdfSelectorOverlay() {
     document.body.style.overflow = '';
     setTimeout(() => {
         overlay.style.display = 'none';
+        
+        // Clear any text selections when overlay is hidden
+        if (pdfViewer && typeof pdfViewer.clearSelection === 'function') {
+            pdfViewer.clearSelection();
+        }
+        selectedText = '';
+        updateSelectedTextDisplay();
     }, 300);
 }
 
@@ -400,6 +458,18 @@ function removeFile() {
     document.getElementById('uploadBtn').style.display = 'none';
     hidePdfSelectorOverlay();
     currentFile = null;
+    
+    // Properly destroy the PDF viewer to prevent issues with subsequent loads
+    if (pdfViewer) {
+        try {
+            console.log('Destroying PDF viewer on file removal...');
+            pdfViewer.destroy();
+            pdfViewer = null;
+        } catch (error) {
+            console.warn('Error destroying PDF viewer:', error);
+            pdfViewer = null; // Force reset
+        }
+    }
     
     // Reset state
     selectedText = '';

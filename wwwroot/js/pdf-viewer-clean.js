@@ -111,12 +111,12 @@ class CleanPDFViewer {
         // Create PDF viewer - ensure container is positioned correctly for PDF.js
         const viewerContainer = this.container.querySelector('#viewerContainer');
         if (viewerContainer) {
-            // PDF.js requires the container to be absolutely positioned
+            // PDF.js requires the container to be absolutely positioned with proper bounds
             viewerContainer.style.position = 'absolute';
-            viewerContainer.style.top = '0';
-            viewerContainer.style.left = '0';
-            viewerContainer.style.right = '0';
-            viewerContainer.style.bottom = '0';
+            viewerContainer.style.top = '2rem';
+            viewerContainer.style.left = '2rem';
+            viewerContainer.style.right = '2rem';
+            viewerContainer.style.bottom = '2rem';
             viewerContainer.style.overflow = 'auto';
         }
         
@@ -170,6 +170,14 @@ class CleanPDFViewer {
     async loadPDF(source) {
         const loadingDiv = this.container.querySelector('#loadingIndicator');
         const contentDiv = this.container.querySelector('#pdfContent');
+        
+        // Ensure container is properly positioned to prevent offsetParent issues
+        if (this.container) {
+            // Make sure the main container has position context
+            if (getComputedStyle(this.container).position === 'static') {
+                this.container.style.position = 'relative';
+            }
+        }
         
         // Make content div visible immediately to allow proper rendering
         contentDiv.style.display = 'flex';
@@ -226,10 +234,10 @@ class CleanPDFViewer {
             const viewerContainer = this.container.querySelector('#viewerContainer');
             if (viewerContainer) {
                 viewerContainer.style.position = 'absolute';
-                viewerContainer.style.top = '0';
-                viewerContainer.style.left = '0';
-                viewerContainer.style.right = '0';
-                viewerContainer.style.bottom = '0';
+                viewerContainer.style.top = '2rem';
+                viewerContainer.style.left = '2rem';
+                viewerContainer.style.right = '2rem';
+                viewerContainer.style.bottom = '2rem';
                 viewerContainer.style.overflow = 'auto';
             }
 
@@ -275,10 +283,10 @@ class CleanPDFViewer {
                 
                 // Ensure the container is properly set up for PDF.js requirements
                 viewerContainer.style.position = 'absolute';
-                viewerContainer.style.top = '0';
-                viewerContainer.style.left = '0';
-                viewerContainer.style.right = '0';
-                viewerContainer.style.bottom = '0';
+                viewerContainer.style.top = '2rem';
+                viewerContainer.style.left = '2rem';
+                viewerContainer.style.right = '2rem';
+                viewerContainer.style.bottom = '2rem';
                 viewerContainer.style.overflow = 'auto';
                 
                 this.pdfViewer = new pdfjsViewer.PDFViewer({
@@ -420,11 +428,21 @@ class CleanPDFViewer {
             if (viewerContainer) {
                 // Reset positioning to ensure PDF.js requirements are met
                 viewerContainer.style.position = 'absolute';
-                viewerContainer.style.top = '0';
-                viewerContainer.style.left = '0';
-                viewerContainer.style.right = '0';
-                viewerContainer.style.bottom = '0';
+                viewerContainer.style.top = '2rem';
+                viewerContainer.style.left = '2rem';
+                viewerContainer.style.right = '2rem';
+                viewerContainer.style.bottom = '2rem';
                 viewerContainer.style.overflow = 'auto';
+                
+                // Ensure the container has an offsetParent by making sure parent positioning is set
+                let parent = viewerContainer.parentElement;
+                while (parent && parent !== document.body) {
+                    if (getComputedStyle(parent).position === 'static') {
+                        parent.style.position = 'relative';
+                        break;
+                    }
+                    parent = parent.parentElement;
+                }
             }
             
             // Multiple approaches to ensure proper rendering
@@ -449,9 +467,15 @@ class CleanPDFViewer {
                 setTimeout(() => {
                     this.pdfViewer.update();
                     
-                    // Additional refresh attempt
-                    if (this.pdfViewer.scrollPageIntoView) {
-                        this.pdfViewer.scrollPageIntoView({ pageNumber: this.currentPage });
+                    // Additional refresh attempt with scroll handling - only if container is properly positioned
+                    try {
+                        if (this.pdfViewer.scrollPageIntoView && 
+                            viewerContainer.offsetParent !== null &&
+                            this.currentPage <= this.totalPages) {
+                            this.pdfViewer.scrollPageIntoView({ pageNumber: this.currentPage });
+                        }
+                    } catch (scrollError) {
+                        console.warn('Scroll error (container positioning issue):', scrollError.message);
                     }
                 }, 100);
             });
@@ -560,7 +584,7 @@ class CleanPDFViewer {
                         }
                         this.pdfViewer._annotationEditorUIManager = null;
                     }
-                    // Clear the viewer
+                    // Clear only the viewer content, not the entire container
                     const viewerElement = this.container ? this.container.querySelector('#viewer') : null;
                     if (viewerElement) {
                         viewerElement.innerHTML = '';
@@ -610,9 +634,31 @@ class CleanPDFViewer {
                 this.pdfDoc = null;
             }
             
-            // Clear container content
+            // Reset the loading/content state without destroying the container HTML
             if (this.container) {
-                this.container.innerHTML = '';
+                const loadingDiv = this.container.querySelector('#loadingIndicator');
+                const contentDiv = this.container.querySelector('#pdfContent');
+                
+                if (loadingDiv) {
+                    loadingDiv.style.display = 'flex';
+                    loadingDiv.innerHTML = `
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-3">Loading PDF...</p>
+                    `;
+                }
+                
+                if (contentDiv) {
+                    contentDiv.style.display = 'none';
+                    contentDiv.style.opacity = '0';
+                }
+                
+                // Reset page display
+                const pageNumElem = this.container.querySelector('#pageNum');
+                const pageCountElem = this.container.querySelector('#pageCount');
+                if (pageNumElem) pageNumElem.textContent = '1';
+                if (pageCountElem) pageCountElem.textContent = '0';
             }
             
             // Reset state
