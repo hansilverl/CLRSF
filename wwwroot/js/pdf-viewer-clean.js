@@ -327,6 +327,9 @@ class CleanPDFViewer {
             // Wait a bit longer for initial render to complete
             await new Promise(resolve => setTimeout(resolve, 500));
 
+            // Setup scroll detection after PDF is loaded and rendered
+            this.setupScrollDetection();
+
             // Show content with smooth transition
             loadingDiv.style.display = 'none';
             contentDiv.style.transition = 'opacity 0.3s ease';
@@ -412,6 +415,99 @@ class CleanPDFViewer {
             
             containerObserver.observe(mainContainer);
             this.containerObserver = containerObserver;
+        }
+    }
+
+    setupScrollDetection() {
+        // Clean up any existing scroll listener first
+        if (this.scrollHandler && this.scrollContainer) {
+            this.scrollContainer.removeEventListener('scroll', this.scrollHandler);
+            this.scrollHandler = null;
+            this.scrollContainer = null;
+        }
+        
+        // Add scroll listener to the viewer container for page number updates
+        const viewerContainer = this.container.querySelector('#viewerContainer');
+        if (!viewerContainer) return;
+
+        let scrollTimeout;
+        const scrollHandler = () => {
+            // Debounce scroll events for better performance
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                this.updateCurrentPageFromScroll();
+            }, 100);
+        };
+
+        viewerContainer.addEventListener('scroll', scrollHandler);
+        
+        // Store reference to remove listener later if needed
+        this.scrollHandler = scrollHandler;
+        this.scrollContainer = viewerContainer;
+    }
+
+    updateCurrentPageFromScroll() {
+        if (!this.pdfViewer || !this.pdfDoc || this.totalPages === 0) return;
+
+        const viewerContainer = this.container.querySelector('#viewerContainer');
+        if (!viewerContainer) return;
+
+        try {
+            // Get all page elements - PDF.js creates div.page elements
+            const pages = viewerContainer.querySelectorAll('.page');
+            if (pages.length === 0) return;
+
+            const containerRect = viewerContainer.getBoundingClientRect();
+            const containerTop = containerRect.top;
+            const containerHeight = containerRect.height;
+            const viewportCenter = containerTop + (containerHeight / 2);
+
+            let visiblePage = 1;
+            let maxVisibleArea = 0;
+
+            // Find the page with the most visible area in the viewport
+            pages.forEach((pageElement, index) => {
+                // PDF.js pages are 0-indexed in the DOM but 1-indexed for display
+                const pageNumber = index + 1;
+
+                const pageRect = pageElement.getBoundingClientRect();
+                
+                // Calculate visible area of the page
+                const visibleTop = Math.max(pageRect.top, containerTop);
+                const visibleBottom = Math.min(pageRect.bottom, containerTop + containerHeight);
+                const visibleHeight = Math.max(0, visibleBottom - visibleTop);
+                const visibleArea = visibleHeight * pageRect.width;
+
+                // Also check if page center is in viewport (alternative method)
+                const pageCenter = pageRect.top + (pageRect.height / 2);
+                const distanceFromViewportCenter = Math.abs(pageCenter - viewportCenter);
+
+                // Use the page with most visible area, or closest center to viewport center
+                if (visibleArea > maxVisibleArea || 
+                    (visibleArea > 0 && distanceFromViewportCenter < containerHeight / 3)) {
+                    maxVisibleArea = visibleArea;
+                    visiblePage = pageNumber;
+                }
+            });
+
+            // Update page number if it changed
+            if (visiblePage !== this.currentPage && visiblePage >= 1 && visiblePage <= this.totalPages) {
+                this.currentPage = visiblePage;
+                const pageNumElem = this.container.querySelector('#pageNum');
+                if (pageNumElem) {
+                    pageNumElem.textContent = this.currentPage;
+                }
+                this.updateControls();
+                
+                // Update PDF.js viewer's current page to keep it in sync
+                if (this.pdfViewer && this.pdfViewer.currentPageNumber !== visiblePage) {
+                    this.pdfViewer.currentPageNumber = visiblePage;
+                }
+                
+                console.log('Page updated from scroll:', visiblePage);
+            }
+        } catch (error) {
+            console.warn('Error updating page from scroll:', error);
         }
     }
 
@@ -622,6 +718,17 @@ class CleanPDFViewer {
                     console.warn('Error disconnecting container observer:', obsErr);
                 }
                 this.containerObserver = null;
+            }
+            
+            // Clean up scroll listener
+            if (this.scrollHandler && this.scrollContainer) {
+                try {
+                    this.scrollContainer.removeEventListener('scroll', this.scrollHandler);
+                } catch (scrollErr) {
+                    console.warn('Error removing scroll listener:', scrollErr);
+                }
+                this.scrollHandler = null;
+                this.scrollContainer = null;
             }
             
             // Clean up PDF document
