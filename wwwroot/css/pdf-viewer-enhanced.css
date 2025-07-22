@@ -182,6 +182,7 @@
     overflow: auto;
     padding: 1.5rem;
     background: #f8fafc;
+    min-height: calc(100vh - 300px); /* Ensure sufficient height for full PDF viewing */
 }
 
 .pdf-page-container {

@@ -108,9 +108,20 @@ class CleanPDFViewer {
             }
         });
         
-        // Create PDF viewer
+        // Create PDF viewer - ensure container is positioned correctly for PDF.js
+        const viewerContainer = this.container.querySelector('#viewerContainer');
+        if (viewerContainer) {
+            // PDF.js requires the container to be absolutely positioned
+            viewerContainer.style.position = 'absolute';
+            viewerContainer.style.top = '0';
+            viewerContainer.style.left = '0';
+            viewerContainer.style.right = '0';
+            viewerContainer.style.bottom = '0';
+            viewerContainer.style.overflow = 'auto';
+        }
+        
         this.pdfViewer = new pdfjsViewer.PDFViewer({
-            container: this.container.querySelector('#viewerContainer'),
+            container: viewerContainer,
             viewer: this.container.querySelector('#viewer'),
             eventBus: this.eventBus,
             textLayerMode: 2, // Enable text selection
@@ -161,7 +172,7 @@ class CleanPDFViewer {
         const contentDiv = this.container.querySelector('#pdfContent');
         
         // Make content div visible immediately to allow proper rendering
-        contentDiv.style.display = 'block';
+        contentDiv.style.display = 'flex';
         contentDiv.style.visibility = 'visible';
         contentDiv.style.opacity = '0';
         loadingDiv.style.display = 'flex';
@@ -179,14 +190,48 @@ class CleanPDFViewer {
                 throw new Error('Invalid PDF source');
             }
 
+            // Validate PDF file before processing
+            if (!arrayBuffer || arrayBuffer.byteLength === 0) {
+                throw new Error('Empty or invalid PDF file');
+            }
+
+            // Check for PDF header
+            const firstBytes = new Uint8Array(arrayBuffer.slice(0, 4));
+            const pdfHeader = String.fromCharCode(...firstBytes);
+            if (!pdfHeader.startsWith('%PDF')) {
+                throw new Error('File does not appear to be a valid PDF');
+            }
+
             const typedArray = new Uint8Array(arrayBuffer);
-            this.pdfDoc = await pdfjsLib.getDocument(typedArray).promise;
+            
+            // Enhanced PDF loading with better error handling
+            const loadingTask = pdfjsLib.getDocument({
+                data: typedArray,
+                disableAutoFetch: false,
+                disableStream: false,
+                isEvalSupported: false,
+                maxImageSize: 1024 * 1024 * 10, // 10MB max image size
+                cMapPacked: true
+            });
+
+            this.pdfDoc = await loadingTask.promise;
             this.totalPages = this.pdfDoc.numPages;
 
             console.log(`PDF loaded: ${this.totalPages} pages`);
 
             // Update UI
             this.container.querySelector('#pageCount').textContent = this.totalPages;
+
+            // Ensure the viewer container is properly positioned
+            const viewerContainer = this.container.querySelector('#viewerContainer');
+            if (viewerContainer) {
+                viewerContainer.style.position = 'absolute';
+                viewerContainer.style.top = '0';
+                viewerContainer.style.left = '0';
+                viewerContainer.style.right = '0';
+                viewerContainer.style.bottom = '0';
+                viewerContainer.style.overflow = 'auto';
+            }
 
             // Defensive: reset viewer before loading new document
             if (this.pdfViewer) {
@@ -223,8 +268,21 @@ class CleanPDFViewer {
             
             // Always recreate the PDF viewer to ensure clean state
             try {
+                const viewerContainer = this.container.querySelector('#viewerContainer');
+                if (!viewerContainer) {
+                    throw new Error('The viewerContainer element not found.');
+                }
+                
+                // Ensure the container is properly set up for PDF.js requirements
+                viewerContainer.style.position = 'absolute';
+                viewerContainer.style.top = '0';
+                viewerContainer.style.left = '0';
+                viewerContainer.style.right = '0';
+                viewerContainer.style.bottom = '0';
+                viewerContainer.style.overflow = 'auto';
+                
                 this.pdfViewer = new pdfjsViewer.PDFViewer({
-                    container: this.container.querySelector('#viewerContainer'),
+                    container: viewerContainer,
                     viewer: this.container.querySelector('#viewer'),
                     eventBus: this.eventBus,
                     textLayerMode: 2, // Enable text selection
@@ -236,29 +294,30 @@ class CleanPDFViewer {
                 
                 this.pdfViewer.setDocument(this.pdfDoc);
             } catch (setDocErr) {
+                console.error('Failed to load PDF in viewer:', setDocErr);
                 throw new Error('Failed to load PDF in viewer: ' + setDocErr.message);
             }
 
-                // Wait for pages to initialize with timeout
-                await Promise.race([
-                    new Promise(resolve => {
-                        this.eventBus.on('pagesinit', resolve, { once: true });
-                    }),
-                    new Promise(resolve => setTimeout(resolve, 3000)) // 3 second timeout
-                ]);
+            // Wait for pages to initialize with timeout
+            await Promise.race([
+                new Promise(resolve => {
+                    this.eventBus.on('pagesinit', resolve, { once: true });
+                }),
+                new Promise(resolve => setTimeout(resolve, 5000)) // Increased timeout to 5 seconds
+            ]);
 
-                this.currentPage = 1;
-                this.container.querySelector('#pageNum').textContent = this.currentPage;
-                this.updateControls();
+            this.currentPage = 1;
+            this.container.querySelector('#pageNum').textContent = this.currentPage;
+            this.updateControls();
 
-                // Force immediate render and update
-                this.pdfViewer.update();
-                if (this.pdfViewer.forceRendering) {
-                    this.pdfViewer.forceRendering();
-                }
+            // Force immediate render and update
+            this.pdfViewer.update();
+            if (this.pdfViewer.forceRendering) {
+                this.pdfViewer.forceRendering();
+            }
 
-                // Wait a bit longer for initial render to complete
-                await new Promise(resolve => setTimeout(resolve, 300));
+            // Wait a bit longer for initial render to complete
+            await new Promise(resolve => setTimeout(resolve, 500));
 
             // Show content with smooth transition
             loadingDiv.style.display = 'none';
@@ -271,197 +330,32 @@ class CleanPDFViewer {
 
         } catch (error) {
             console.error('Error loading PDF:', error);
+            
+            let errorMessage = 'Error loading PDF';
+            let errorDetail = error.message;
+            
+            // Provide more user-friendly error messages
+            if (error.message.includes('Invalid PDF structure') || error.message.includes('Bad FCHECK')) {
+                errorMessage = 'PDF file appears to be corrupted';
+                errorDetail = 'Please try a different PDF file or re-save the original.';
+            } else if (error.message.includes('container') && error.message.includes('positioned')) {
+                errorMessage = 'PDF viewer positioning error';
+                errorDetail = 'Please refresh the page and try again.';
+            } else if (error.message.includes('FormatError')) {
+                errorMessage = 'PDF format error';
+                errorDetail = 'This PDF file may be damaged or use an unsupported format.';
+            }
+            
             loadingDiv.innerHTML = `
                 <div class="text-danger text-center">
                     <i class="bi bi-exclamation-triangle"></i>
-                    <p class="mt-2">Error loading PDF</p>
-                    <small>${error.message}</small>
+                    <p class="mt-2">${errorMessage}</p>
+                    <small>${errorDetail}</small>
                 </div>
             `;
             // Reset content div visibility on error
             contentDiv.style.display = 'none';
             contentDiv.style.visibility = 'visible';
-        }
-    }
-
-    async renderPage(pageNum) {
-        if (!this.pdfDoc) return;
-
-        try {
-            console.log(`Rendering page ${pageNum} with clean viewer`);
-            
-            const page = await this.pdfDoc.getPage(pageNum);
-            const viewport = page.getViewport({ scale: this.scale });
-
-            const viewer = this.container.querySelector('#viewer');
-            viewer.innerHTML = '';
-
-            // Create page container
-            const pageContainer = document.createElement('div');
-            pageContainer.className = 'page';
-            pageContainer.style.position = 'relative';
-            pageContainer.style.margin = '0 auto 20px auto';
-            pageContainer.style.width = viewport.width + 'px';
-            pageContainer.style.height = viewport.height + 'px';
-
-            // Create canvas for PDF rendering
-            const canvas = document.createElement('canvas');
-            canvas.height = viewport.height;
-            canvas.width = viewport.width;
-            canvas.style.display = 'block';
-
-            // Create text layer div
-            const textLayerDiv = document.createElement('div');
-            textLayerDiv.className = 'textLayer';
-            textLayerDiv.style.position = 'absolute';
-            textLayerDiv.style.left = '0px';
-            textLayerDiv.style.top = '0px';
-            textLayerDiv.style.right = '0px';
-            textLayerDiv.style.bottom = '0px';
-            textLayerDiv.style.overflow = 'hidden';
-            textLayerDiv.style.lineHeight = '1.0';
-
-            pageContainer.appendChild(canvas);
-            pageContainer.appendChild(textLayerDiv);
-            viewer.appendChild(pageContainer);
-
-            // Render page to canvas
-            const renderContext = {
-                canvasContext: canvas.getContext('2d'),
-                viewport: viewport
-            };
-
-            await page.render(renderContext).promise;
-
-            // Render text layer using PDF.js built-in TextLayerBuilder
-            const textContent = await page.getTextContent();
-            
-            if (typeof pdfjsViewer !== 'undefined' && pdfjsViewer.TextLayerBuilder) {
-                const textLayerBuilder = new pdfjsViewer.TextLayerBuilder({
-                    textLayerDiv: textLayerDiv,
-                    eventBus: this.eventBus,
-                    pageIndex: pageNum - 1,
-                    viewport: viewport
-                });
-                
-                textLayerBuilder.setTextContent(textContent);
-                await textLayerBuilder.render();
-            } else {
-                console.log('PDF.js TextLayerBuilder not available, using basic text layer');
-                await this.createBasicTextLayer(textContent, textLayerDiv, viewport);
-            }
-
-            this.currentPage = pageNum;
-            this.container.querySelector('#pageNum').textContent = pageNum;
-            this.updateControls();
-
-            console.log(`Page ${pageNum} rendered successfully with proper text layer`);
-
-        } catch (error) {
-            console.error('Error rendering page:', error);
-        }
-    }
-
-    async createBasicTextLayer(textContent, container, viewport) {
-        // Clear container
-        container.innerHTML = '';
-        
-        // Create text elements with word-by-word clicking support
-        textContent.items.forEach((textItem, index) => {
-            if (!textItem.str.trim()) return;
-            
-            // Split text into words
-            const words = textItem.str.split(/(\s+|-)/);
-            let wordPosition = 0;
-            
-            words.forEach((word, wordIndex) => {
-                if (!word.trim() && !/\s|-/.test(word)) return;
-                
-                const wordSpan = document.createElement('span');
-                wordSpan.textContent = word;
-                wordSpan.className = 'pdf-word';
-                wordSpan.style.position = 'absolute';
-                wordSpan.style.color = 'transparent';
-                wordSpan.style.userSelect = 'text';
-                wordSpan.style.pointerEvents = 'auto';
-                wordSpan.style.cursor = 'pointer';
-                wordSpan.style.fontSize = textItem.height + 'px';
-                wordSpan.style.fontFamily = textItem.fontName || 'sans-serif';
-                
-                // Calculate word position based on character width estimation
-                const charWidth = textItem.width / textItem.str.length;
-                const wordLeft = textItem.transform[4] + (wordPosition * charWidth);
-                wordSpan.style.left = wordLeft + 'px';
-                wordSpan.style.top = textItem.transform[5] + 'px';
-                wordSpan.style.transformOrigin = '0% 0%';
-                
-                // Apply the exact transform from PDF.js
-                const transform = textItem.transform;
-                wordSpan.style.transform = `matrix(${transform[0]}, ${transform[1]}, ${transform[2]}, ${transform[3]}, 0, 0)`;
-                
-                // Add click handler for word selection
-                if (word.trim() && !/^\s+$/.test(word)) {
-                    wordSpan.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        this.selectWord(wordSpan, word.trim());
-                    });
-                    
-                    // Add hover effect
-                    wordSpan.addEventListener('mouseenter', () => {
-                        wordSpan.style.backgroundColor = 'rgba(74, 157, 168, 0.2)';
-                    });
-                    
-                    wordSpan.addEventListener('mouseleave', () => {
-                        if (!wordSpan.classList.contains('selected-word')) {
-                            wordSpan.style.backgroundColor = 'transparent';
-                        }
-                    });
-                }
-                
-                container.appendChild(wordSpan);
-                wordPosition += word.length;
-            });
-        });
-    }
-
-    selectWord(wordElement, word) {
-        // Clear any existing selections
-        this.clearWordSelections();
-        
-        // Mark this word as selected
-        wordElement.classList.add('selected-word');
-        wordElement.style.backgroundColor = 'rgba(74, 157, 168, 0.4)';
-        wordElement.style.color = 'rgba(0, 0, 0, 0.8)';
-        
-        // Update selected text
-        this.selectedText = word;
-        
-        // Dispatch word click event
-        this.container.dispatchEvent(new CustomEvent('wordClicked', {
-            detail: { word: word, element: wordElement }
-        }));
-        
-        console.log('Word selected:', word);
-    }
-
-    clearWordSelections() {
-        // Clear all word selections
-        const selectedWords = this.container.querySelectorAll('.selected-word');
-        selectedWords.forEach(word => {
-            word.classList.remove('selected-word');
-            word.style.backgroundColor = 'transparent';
-            word.style.color = 'transparent';
-        });
-    }
-
-    clearSelection() {
-        this.clearWordSelections();
-        this.selectedText = '';
-        
-        // Clear browser text selection too
-        if (window.getSelection) {
-            window.getSelection().removeAllRanges();
         }
     }
 
@@ -521,8 +415,25 @@ class CleanPDFViewer {
         try {
             console.log('Force refreshing PDF viewer');
             
+            // Ensure container positioning is correct before refresh
+            const viewerContainer = this.container.querySelector('#viewerContainer');
+            if (viewerContainer) {
+                // Reset positioning to ensure PDF.js requirements are met
+                viewerContainer.style.position = 'absolute';
+                viewerContainer.style.top = '0';
+                viewerContainer.style.left = '0';
+                viewerContainer.style.right = '0';
+                viewerContainer.style.bottom = '0';
+                viewerContainer.style.overflow = 'auto';
+            }
+            
             // Multiple approaches to ensure proper rendering
             requestAnimationFrame(() => {
+                // Force container resize detection
+                if (this.pdfViewer.updateScaleAndCanvas) {
+                    this.pdfViewer.updateScaleAndCanvas();
+                }
+                
                 this.pdfViewer.update();
                 
                 // Force re-render of current pages
@@ -537,7 +448,12 @@ class CleanPDFViewer {
                 // Force another update after a short delay
                 setTimeout(() => {
                     this.pdfViewer.update();
-                }, 50);
+                    
+                    // Additional refresh attempt
+                    if (this.pdfViewer.scrollPageIntoView) {
+                        this.pdfViewer.scrollPageIntoView({ pageNumber: this.currentPage });
+                    }
+                }, 100);
             });
             
         } catch (error) {
@@ -568,8 +484,6 @@ class CleanPDFViewer {
             this.currentPage = this.pdfViewer.currentPageNumber;
             this.container.querySelector('#pageNum').textContent = this.currentPage;
             this.updateControls();
-        } else if (!this.pdfViewer && this.currentPage > 1) {
-            this.renderPage(this.currentPage - 1);
         }
     }
 
@@ -579,8 +493,6 @@ class CleanPDFViewer {
             this.currentPage = this.pdfViewer.currentPageNumber;
             this.container.querySelector('#pageNum').textContent = this.currentPage;
             this.updateControls();
-        } else if (!this.pdfViewer && this.currentPage < this.totalPages) {
-            this.renderPage(this.currentPage + 1);
         }
     }
 
@@ -590,8 +502,6 @@ class CleanPDFViewer {
         
         if (this.pdfViewer) {
             this.pdfViewer.currentScaleValue = this.scale;
-        } else {
-            this.renderPage(this.currentPage);
         }
     }
 
@@ -601,8 +511,6 @@ class CleanPDFViewer {
         
         if (this.pdfViewer) {
             this.pdfViewer.currentScaleValue = this.scale;
-        } else {
-            this.renderPage(this.currentPage);
         }
     }
 
@@ -630,6 +538,15 @@ class CleanPDFViewer {
 
     getSelectedText() {
         return this.selectedText;
+    }
+
+    clearSelection() {
+        this.selectedText = '';
+        
+        // Clear browser text selection too
+        if (window.getSelection) {
+            window.getSelection().removeAllRanges();
+        }
     }
 
     destroy() {

@@ -247,27 +247,27 @@ function showPdfSelectorOverlay() {
     document.body.style.overflow = 'hidden';
     
     // Force PDF viewer refresh after overlay is fully visible
-    // Use multiple timeouts to ensure proper rendering
+    // Use multiple timeouts to ensure proper rendering with increased delays
     setTimeout(() => {
         if (pdfViewer && typeof pdfViewer.forceRefresh === 'function') {
             console.log('Overlay visible, forcing PDF refresh (first attempt)');
             pdfViewer.forceRefresh();
         }
-    }, 100); // Immediate attempt
+    }, 150); // Slightly longer initial attempt
     
     setTimeout(() => {
         if (pdfViewer && typeof pdfViewer.forceRefresh === 'function') {
             console.log('Overlay visible, forcing PDF refresh (second attempt)');
             pdfViewer.forceRefresh();
         }
-    }, 400); // After transition completes
+    }, 500); // After transition completes
     
     setTimeout(() => {
         if (pdfViewer && typeof pdfViewer.forceRefresh === 'function') {
             console.log('Overlay visible, forcing PDF refresh (final attempt)');
             pdfViewer.forceRefresh();
         }
-    }, 800); // Extra safety margin
+    }, 1000); // Extra safety margin with longer delay
 }
 
 // Hide PDF selector overlay
