@@ -105,12 +105,6 @@
 </form>
 
 <script>
-    function formatNumberWithCommas(num) {
-        let cleanNum = num.toString().replace(/[^\d.]/g, '');
-        let parts = cleanNum.split('.');
-        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-        return parts.join('.');
-    }
 
     document.addEventListener('DOMContentLoaded', function () {
         const amountDisplay = document.getElementById('AmountDisplay');

@@ -483,64 +483,30 @@
     border-radius: 8px;
 }
 
-.pdf-text-content {
+.pdf-canvas-container {
+    position: relative;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
     border-radius: 8px;
     background: white;
     border: 1px solid var(--border-light);
-    position: relative;
-    overflow: visible;
-    margin: 0 auto;
-    padding: 20px;
-    min-height: 400px;
+    overflow: hidden;
 }
 
-.pdf-text-line {
+#pdfCanvas {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+#pdfTextLayer {
     position: absolute;
-    cursor: text;
-    user-select: text;
-    -webkit-user-select: text;
-    -moz-user-select: text;
-    -ms-user-select: text;
-    line-height: 1.0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
 }
 
-.pdf-text-line:hover {
-    background-color: rgba(74, 157, 168, 0.05);
-    border-radius: 2px;
-}
-
-.pdf-text-content::selection {
-    background: rgba(74, 157, 168, 0.3);
-}
-
-.pdf-text-content::-moz-selection {
-    background: rgba(74, 157, 168, 0.3);
-}
-
-/* Better text rendering for different font weights */
-.pdf-text-item {
-    color: #000000;
-    user-select: text;
-    -webkit-user-select: text;
-    -moz-user-select: text;
-    -ms-user-select: text;
-    cursor: text;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-.pdf-text-item::selection {
-    background: rgba(74, 157, 168, 0.4);
-    color: #000000;
-}
-
-.pdf-text-item::-moz-selection {
-    background: rgba(74, 157, 168, 0.4);
-    color: #000000;
-}
 
 .field-mapping-panel {
     background: var(--gray-50);

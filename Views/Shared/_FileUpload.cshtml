@@ -105,7 +105,10 @@
             </div>
             
             <div class="pdf-content-container">
-                <div id="pdfTextContent" class="pdf-text-content"></div>
+                <div class="pdf-canvas-container">
+                    <canvas id="pdfCanvas"></canvas>
+                    <div id="pdfTextLayer" class="textLayer"></div>
+                </div>
             </div>
         </div>
         
@@ -226,7 +229,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-    
+
+    const textLayer = document.getElementById('pdfTextLayer');
+    textLayer?.addEventListener('mouseup', handleTextSelection);
+    document.addEventListener('mouseup', hideTooltipOnOutsideClick);
+
     // Action buttons
     document.getElementById('applyMappedValues')?.addEventListener('click', applyMappedValuesToForm);
     document.getElementById('clearMappings')?.addEventListener('click', clearAllMappings);
@@ -299,14 +306,33 @@ function renderPage(num) {
     // Get page
     pdfDoc.getPage(num).then(function(page) {
         const viewport = page.getViewport({ scale: scale });
-        
-        // Get text content for rendering
-        return page.getTextContent().then(function(textContent) {
-            renderTextContent(textContent, viewport);
-            
+
+        const canvas = document.getElementById('pdfCanvas');
+        const context = canvas.getContext('2d');
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+
+        const textLayer = document.getElementById('pdfTextLayer');
+        textLayer.innerHTML = '';
+        textLayer.style.height = viewport.height + 'px';
+        textLayer.style.width = viewport.width + 'px';
+
+        const renderContext = {
+            canvasContext: context,
+            viewport: viewport
+        };
+        page.render(renderContext).promise.then(function() {
+            return page.getTextContent();
+        }).then(function(textContent) {
+            pdfjsLib.renderTextLayer({
+                textContent: textContent,
+                container: textLayer,
+                viewport: viewport,
+                textDivs: []
+            });
+
             pageRendering = false;
             if (pageNumPending !== null) {
-                // New page rendering is pending
                 renderPage(pageNumPending);
                 pageNumPending = null;
             }
@@ -317,124 +343,6 @@ function renderPage(num) {
     document.getElementById('pageNum').textContent = num;
 }
 
-// Render text content as visible, selectable text
-function renderTextContent(textContent, viewport) {
-    const textContainer = document.getElementById('pdfTextContent');
-    textContainer.innerHTML = '';
-    
-    // Set container dimensions
-    textContainer.style.width = Math.floor(viewport.width) + 'px';
-    textContainer.style.height = Math.floor(viewport.height) + 'px';
-    textContainer.style.position = 'relative';
-    textContainer.style.background = '#ffffff';
-    textContainer.style.border = '1px solid #ddd';
-    textContainer.style.overflow = 'auto';
-    textContainer.style.fontFamily = 'Arial, sans-serif';
-    
-    // Group text items by approximate lines for better rendering
-    const lines = groupTextIntoLines(textContent.items, viewport);
-    
-    // Render each line
-    lines.forEach(function(line, lineIndex) {
-        const lineDiv = document.createElement('div');
-        lineDiv.className = 'pdf-text-line';
-        lineDiv.style.position = 'absolute';
-        lineDiv.style.left = line.left + 'px';
-        lineDiv.style.top = line.top + 'px';
-        lineDiv.style.height = line.height + 'px';
-        lineDiv.style.lineHeight = line.height + 'px';
-        lineDiv.style.fontSize = Math.max(10, line.fontSize) + 'px';
-        lineDiv.style.color = '#000000';
-        lineDiv.style.cursor = 'text';
-        lineDiv.style.userSelect = 'text';
-        lineDiv.style.whiteSpace = 'nowrap';
-        lineDiv.style.overflow = 'visible';
-        
-        // Add all text items in this line
-        line.items.forEach(function(textItem, itemIndex) {
-            const textSpan = document.createElement('span');
-            textSpan.className = 'pdf-text-item';
-            textSpan.textContent = textItem.str;
-            textSpan.style.marginRight = (textItem.spaceAfter || 0) + 'px';
-            textSpan.style.fontWeight = textItem.fontName && textItem.fontName.includes('Bold') ? 'bold' : 'normal';
-            textSpan.style.fontStyle = textItem.fontName && textItem.fontName.includes('Italic') ? 'italic' : 'normal';
-            
-            lineDiv.appendChild(textSpan);
-        });
-        
-        textContainer.appendChild(lineDiv);
-    });
-    
-    // Remove any existing selection tooltip
-    removeSelectionTooltip();
-    
-    // Add selection listener
-    textContainer.addEventListener('mouseup', handleTextSelection);
-    document.addEventListener('mouseup', hideTooltipOnOutsideClick);
-}
-
-// Group text items into lines for better rendering
-function groupTextIntoLines(textItems, viewport) {
-    const lines = [];
-    const lineThreshold = 5; // pixels tolerance for same line
-    
-    textItems.forEach(function(textItem) {
-        const x = textItem.transform[4] * scale;
-        const y = viewport.height - (textItem.transform[5] * scale) - (textItem.height * scale);
-        const height = Math.max(12, textItem.height * scale); // Minimum height for readability
-        const fontSize = Math.max(10, height * 0.8); // Slightly smaller than height for better appearance
-        
-        // Find existing line or create new one
-        let targetLine = lines.find(line => 
-            Math.abs(line.top - y) <= lineThreshold && 
-            Math.abs(line.height - height) <= 3
-        );
-        
-        if (!targetLine) {
-            targetLine = {
-                top: y,
-                left: x,
-                height: height,
-                fontSize: fontSize,
-                items: []
-            };
-            lines.push(targetLine);
-        }
-        
-        // Update line bounds
-        targetLine.left = Math.min(targetLine.left, x);
-        
-        // Add text item to line
-        targetLine.items.push({
-            str: textItem.str,
-            x: x,
-            spaceAfter: 0,
-            fontName: textItem.fontName || '',
-            width: textItem.width * scale
-        });
-    });
-    
-    // Sort items within each line by x position and calculate spacing
-    lines.forEach(function(line) {
-        line.items.sort((a, b) => a.x - b.x);
-        
-        // Calculate space after each item based on actual spacing in PDF
-        for (let i = 0; i < line.items.length - 1; i++) {
-            const current = line.items[i];
-            const next = line.items[i + 1];
-            const estimatedWidth = current.width || (current.str.length * (line.fontSize * 0.6));
-            const gap = next.x - (current.x + estimatedWidth);
-            
-            // Add appropriate spacing (minimum 1px, maximum 50px)
-            current.spaceAfter = Math.max(1, Math.min(50, gap));
-        }
-    });
-    
-    // Sort lines by vertical position
-    lines.sort((a, b) => a.top - b.top);
-    
-    return lines;
-}
 
 // Handle text selection
 function handleTextSelection(event) {
@@ -687,13 +595,6 @@ function applyMappedValuesToForm() {
     }, 500);
 }
 
-// Utility functions
-function formatNumberWithCommas(num) {
-    let cleanNum = num.toString().replace(/[^\d.]/g, '');
-    let parts = cleanNum.split('.');
-    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    return parts.join('.');
-}
 
 function parseDate(dateStr) {
     // Try to parse various date formats
