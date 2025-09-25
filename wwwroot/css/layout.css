@@ -16,6 +16,12 @@
     padding-top: 1rem;
 }
 
+/* Reduce min-height when manual tab is active to minimize space between input and results */
+.main-converter-section.manual-active {
+    min-height: auto;
+    padding-bottom: 1.5rem;
+}
+
 .converter-card {
     background: white;
     border-radius: 16px;

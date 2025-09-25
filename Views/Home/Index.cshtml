@@ -107,6 +107,7 @@ document.addEventListener('DOMContentLoaded', function() {
     tabButtons.forEach(button => {
         button.addEventListener('click', function() {
             const targetTab = this.getAttribute('data-tab');
+            const converterSection = document.querySelector('.main-converter-section');
             
             // Remove active class from all buttons and panes
             tabButtons.forEach(btn => btn.classList.remove('active'));
@@ -115,8 +116,19 @@ document.addEventListener('DOMContentLoaded', function() {
             // Add active class to clicked button and corresponding pane
             this.classList.add('active');
             document.getElementById(targetTab + '-tab').classList.add('active');
+            
+            // Toggle manual-active class on converter section
+            if (targetTab === 'manual') {
+                converterSection.classList.add('manual-active');
+            } else {
+                converterSection.classList.remove('manual-active');
+            }
         });
     });
+    
+    // Set initial state for manual tab (which is active by default)
+    const converterSection = document.querySelector('.main-converter-section');
+    converterSection.classList.add('manual-active');
 
     // Error toast functionality
     document.addEventListener('click', function(e) {
