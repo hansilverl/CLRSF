@@ -705,22 +705,137 @@ function formatNumberWithCommas(num) {
 }
 
 function parseDate(dateStr) {
+    if (!dateStr || typeof dateStr !== 'string') {
+        return null;
+    }
+    
+    // Clean up the date string
+    const cleanDateStr = dateStr.trim();
+    console.log('parseDate called with:', cleanDateStr);
+    
     // Try to parse various date formats
     const patterns = [
-        /(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/,  // MM/DD/YYYY or DD/MM/YYYY
-        /(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/,  // YYYY/MM/DD
+        // MM/DD/YYYY or DD/MM/YYYY format 
+        {
+            regex: /^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/,
+            handler: (match) => {
+                const first = parseInt(match[1]);
+                const second = parseInt(match[2]);
+                const year = parseInt(match[3]);
+                
+                let month, day;
+                
+                // Check if this looks like DD/MM/YYYY (first number > 12 indicates day)
+                if (first > 12) {
+                    // This is DD/MM/YYYY
+                    day = match[1].padStart(2, '0');
+                    month = match[2].padStart(2, '0');
+                    console.log('Detected DD/MM/YYYY format:', `${year}-${month}-${day}`);
+                } else if (second > 12) {
+                    // This is MM/DD/YYYY (second number > 12 indicates day)
+                    month = match[1].padStart(2, '0');
+                    day = match[2].padStart(2, '0');
+                    console.log('Detected MM/DD/YYYY format:', `${year}-${month}-${day}`);
+                } else {
+                    // Ambiguous case - default to MM/DD/YYYY since example shows 09/10/2022 (September 10th)
+                    month = match[1].padStart(2, '0');
+                    day = match[2].padStart(2, '0');
+                    console.log('Ambiguous date, assuming MM/DD/YYYY format:', `${year}-${month}-${day}`);
+                }
+                
+                const result = `${year}-${month}-${day}`;
+                console.log('parseDate returning:', result);
+                return result;
+            }
+        },
+
+        // YYYY/MM/DD or YYYY-MM-DD format
+        {
+            regex: /^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/,
+            handler: (match) => {
+                const year = match[1];
+                const month = match[2].padStart(2, '0');
+                const day = match[3].padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
+        },
+        // Month names (e.g., "September 10, 2022" or "10 Sep 2022")
+        {
+            regex: /(\w+)\s+(\d{1,2}),?\s+(\d{4})|(\d{1,2})\s+(\w+)\s+(\d{4})/,
+            handler: (match) => {
+                const monthNames = {
+                    'january': '01', 'jan': '01', 'february': '02', 'feb': '02', 'march': '03', 'mar': '03',
+                    'april': '04', 'apr': '04', 'may': '05', 'june': '06', 'jun': '06',
+                    'july': '07', 'jul': '07', 'august': '08', 'aug': '08', 'september': '09', 'sep': '09',
+                    'october': '10', 'oct': '10', 'november': '11', 'nov': '11', 'december': '12', 'dec': '12'
+                };
+                
+                let month, day, year;
+                if (match[1]) {
+                    // "Month day, year" format
+                    month = monthNames[match[1].toLowerCase()];
+                    day = match[2].padStart(2, '0');
+                    year = match[3];
+                } else {
+                    // "day Month year" format
+                    day = match[4].padStart(2, '0');
+                    month = monthNames[match[5].toLowerCase()];
+                    year = match[6];
+                }
+                
+                if (month) {
+                    return `${year}-${month}-${day}`;
+                }
+                return null;
+            }
+        },
+        // Dot separated format (DD.MM.YYYY - common in Europe)
+        {
+            regex: /^(\d{1,2})\.(\d{1,2})\.(\d{4})$/,
+            handler: (match) => {
+                const day = match[1].padStart(2, '0');
+                const month = match[2].padStart(2, '0');
+                const year = match[3];
+                return `${year}-${month}-${day}`;
+            }
+        }
     ];
     
+    // Try each pattern
     for (const pattern of patterns) {
-        const match = dateStr.match(pattern);
+        const match = cleanDateStr.match(pattern.regex);
         if (match) {
-            // Assume DD/MM/YYYY format for Israeli banks
-            const day = match[1].padStart(2, '0');
-            const month = match[2].padStart(2, '0');
-            const year = match[3];
-            return `${year}-${month}-${day}`;
+            try {
+                const result = pattern.handler(match);
+                if (result) {
+                    // Validate the resulting date
+                    const date = new Date(result);
+                    if (!isNaN(date.getTime()) && date.getFullYear() > 1900 && date.getFullYear() < 2100) {
+                        return result;
+                    }
+                }
+            } catch (e) {
+                console.warn('Error parsing date with pattern:', pattern.regex, e);
+            }
         }
     }
+    
+    // If no pattern matches, try JavaScript's Date.parse as a fallback
+    try {
+        const date = new Date(cleanDateStr);
+        if (!isNaN(date.getTime()) && date.getFullYear() > 1900 && date.getFullYear() < 2100) {
+            const year = date.getFullYear();
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const day = date.getDate().toString().padStart(2, '0');
+            const result = `${year}-${month}-${day}`;
+            console.log('parseDate fallback returning:', result);
+            return result;
+        }
+    } catch (e) {
+        console.warn('Error with Date.parse fallback:', e);
+    }
+    
+    console.log('parseDate returning null for:', cleanDateStr);
     return null;
 }
 

@@ -694,7 +694,18 @@ class PDFViewer {
             // Clean up event bus
             if (this.eventBus) {
                 try {
-                    this.eventBus.destroy();
+                    // Check if destroy method exists before calling it
+                    if (typeof this.eventBus.destroy === 'function') {
+                        this.eventBus.destroy();
+                    } else {
+                        // For older versions of PDF.js, manually remove all listeners
+                        if (typeof this.eventBus.off === 'function' || typeof this.eventBus.removeAllListeners === 'function') {
+                            // Try to remove all listeners if method exists
+                            if (typeof this.eventBus.removeAllListeners === 'function') {
+                                this.eventBus.removeAllListeners();
+                            }
+                        }
+                    }
                 } catch (eventBusErr) {
                     console.warn('Error destroying event bus:', eventBusErr);
                 }
