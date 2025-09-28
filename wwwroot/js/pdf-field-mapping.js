@@ -140,7 +140,7 @@ function initializePdfViewer() {
         
         // Check if CleanPDFViewer is available
         if (typeof CleanPDFViewer === 'undefined') {
-            console.error('CleanPDFViewer class not found. Make sure pdf-viewer-clean.js is loaded.');
+            console.error('CleanPDFViewer class not found. Make sure pdf-viewer.js is loaded.');
             return;
         }
         
