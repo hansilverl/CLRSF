@@ -49,7 +49,7 @@ The `BOIExchangeRateService` implements the `IExchangeRateService` interface to 
 
 #### 2. PDF Processing Engine
 The application incorporates a sophisticated PDF processing system consisting of:
-- **CleanPDFViewer**: Custom PDF rendering engine built on PDF.js
+- **PDFViewer**: Custom PDF rendering engine built on PDF.js
 - **Field Mapping Interface**: Interactive text selection and field association
 - **Text Recognition**: Automated parsing of financial document structures
 
