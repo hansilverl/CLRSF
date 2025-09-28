@@ -138,9 +138,9 @@ function initializePdfViewer() {
             return;
         }
         
-        // Check if CleanPDFViewer is available
-        if (typeof CleanPDFViewer === 'undefined') {
-            console.error('CleanPDFViewer class not found. Make sure pdf-viewer.js is loaded.');
+        // Check if PDFViewer is available
+        if (typeof PDFViewer === 'undefined') {
+            console.error('PDFViewer class not found. Make sure pdf-viewer.js is loaded.');
             return;
         }
         
@@ -157,8 +157,8 @@ function initializePdfViewer() {
         
         console.log('PDF.js version:', pdfjsLib.version);
         
-        // Initialize the clean PDF viewer
-        pdfViewer = new CleanPDFViewer('nativePdfViewer', {
+        // Initialize the PDF viewer
+        pdfViewer = new PDFViewer('nativePdfViewer', {
             scale: 1.2
         });
 

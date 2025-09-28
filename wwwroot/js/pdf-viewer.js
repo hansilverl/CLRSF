@@ -1,9 +1,9 @@
 /**
- * Clean PDF Viewer using PDF.js complete viewer infrastructure
+ * PDF Viewer using PDF.js complete viewer infrastructure
  * This avoids text overlay issues by using PDF.js native rendering
  */
 
-class CleanPDFViewer {
+class PDFViewer {
     constructor(containerId, options = {}) {
         this.containerId = containerId;
         this.container = document.getElementById(containerId);
@@ -41,7 +41,7 @@ class CleanPDFViewer {
 
     createHTML() {
         this.container.innerHTML = `
-            <div class="clean-pdf-viewer">
+            <div class="pdf-viewer">
                 <!-- Controls -->
                 <div class="pdf-controls">
                     <div class="nav-controls">
@@ -186,7 +186,7 @@ class CleanPDFViewer {
         loadingDiv.style.display = 'flex';
 
         try {
-            console.log('Loading PDF with clean viewer...');
+            console.log('Loading PDF with viewer...');
 
             let arrayBuffer;
             if (source instanceof File) {
@@ -780,4 +780,6 @@ class CleanPDFViewer {
 }
 
 // Export for use
-window.CleanPDFViewer = CleanPDFViewer;
+window.PDFViewer = PDFViewer;
+// Backward compatibility
+window.CleanPDFViewer = PDFViewer;
