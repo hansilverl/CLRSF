@@ -50,7 +50,7 @@
     box-sizing: border-box;
 }
 
-/* Enhanced Typography */
+/* Typography */
 h1, h2, h3, h4, h5, h6 {
     font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-weight: 600;
@@ -84,7 +84,6 @@ select {
     line-height: 1.5;
 }
 
-/* Enhanced text sizes */
 p {
     font-size: 16px;
     margin-bottom: 1rem;
